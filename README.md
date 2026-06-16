@@ -84,6 +84,7 @@ Aplikasi ini sudah dilengkapi dengan berkas `Dockerfile`.
   ```
 - Masukkan environment variables (`MONGODB_URI`, `MUSTIKA_API_KEY`, `ADMIN_KEY`, `JWT_SECRET`) saat diminta di Google Cloud Console atau lewat argumen `--set-env-vars`.
 
+
 ### 3. VPS dengan PM2 (Virtual Private Server)
 - Hubungkan VPS Anda via SSH.
 - Pastikan Node.js dan MongoDB/git sudah terinstall di VPS.
@@ -103,7 +104,28 @@ Aplikasi ini sudah dilengkapi dengan berkas `Dockerfile`.
   pm2 save
   ```
 
+### 4. Vercel (Serverless Deployment)
+Proyek ini sudah dilengkapi dengan berkas konfigurasi `vercel.json` dan penyesuaian serverless pada `server.js`.
+- Install Vercel CLI secara global di komputer Anda:
+  ```bash
+  npm install -g vercel
+  ```
+- Jalankan perintah berikut untuk menginisialisasi dan men-deploy proyek ke Vercel:
+  ```bash
+  vercel
+  ```
+- Masukkan semua variabel lingkungan di dashboard Vercel Anda (Settings > Environment Variables) seperti:
+  - `MONGODB_URI`
+  - `MUSTIKA_API_KEY`
+  - `ADMIN_KEY`
+  - `JWT_SECRET`
+- Lakukan deploy produksi dengan perintah:
+  ```bash
+  vercel --prod
+  ```
+
 ---
+
 
 ## 🔐 Keamanan & Fitur Tambahan
 - **Anti-DevTools**: Melindungi kode dari pembongkaran dengan memblokir interaksi ketika Developer Tools dibuka (bisa dilewati saat pengujian lokal dengan parameter URL `?bypass_dev=true`).
