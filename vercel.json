@@ -6,6 +6,9 @@
       "use": "@vercel/node"
     }
   ],
+  "regions": [
+    "sin1"
+  ],
   "routes": [
     {
       "src": "/api/(.*)",
