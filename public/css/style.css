@@ -187,6 +187,83 @@
             z-index: 10;
         }
 
+        .nav-right-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .user-nav-widget-container {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 4px 12px;
+            border-radius: var(--radius-sm);
+            border: var(--color-border-hairline);
+            display: flex;
+        }
+
+        .user-nav-email {
+            color: var(--color-text-dark);
+            font-weight: 700;
+            max-width: 120px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .user-nav-link-dashboard {
+            color: var(--color-primary);
+            cursor: pointer;
+            font-weight: 700;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s ease;
+        }
+
+        .user-nav-link-dashboard:hover {
+            color: var(--color-primary-hover);
+        }
+
+        .user-nav-divider {
+            color: rgba(255, 255, 255, 0.15);
+        }
+
+        .user-nav-link-logout {
+            color: var(--color-text-muted);
+            cursor: pointer;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s ease;
+        }
+
+        .user-nav-link-logout:hover {
+            color: #ff3b30;
+        }
+
+        .btn-login-nav {
+            background-color: var(--color-primary);
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            font-size: 10px;
+            border-radius: var(--radius-sm);
+            box-shadow: 0 4px 10px rgba(255, 94, 0, 0.25);
+            transition: all 0.2s ease;
+        }
+
+        .btn-login-nav:hover {
+            background-color: var(--color-primary-hover);
+            transform: translateY(-1px);
+        }
+
+
         /* Responsive Dual-Column Grid */
         .landing-grid {
             display: grid;
@@ -2143,5 +2220,68 @@
             .form-grid-2 {
                 grid-template-columns: 1fr;
                 gap: 12px;
+            }
+
+            /* Landing Navigation Mobile Responsiveness */
+            .landing-nav {
+                padding: 10px 16px;
+                margin-bottom: 24px;
+                margin-top: 5px;
+            }
+            
+            .landing-logo {
+                font-size: 16px !important;
+            }
+            
+            .nav-right-container {
+                gap: 6px !important;
+            }
+            
+            .user-nav-widget-container {
+                padding: 4px 8px;
+                gap: 8px;
+            }
+            
+            .user-nav-email, 
+            .user-nav-divider {
+                display: none !important; /* Hide email and vertical pipe on small screens */
+            }
+            
+            .user-nav-link-dashboard span,
+            .user-nav-link-logout span {
+                display: none !important; /* Hide text, only show icons for clean fit */
+            }
+            
+            .user-nav-link-dashboard,
+            .user-nav-link-logout {
+                font-size: 15px; /* Larger icons for easy touch target */
+                padding: 4px;
+            }
+            
+            .btn-login-nav {
+                padding: 4px 8px !important;
+                font-size: 9px !important;
+            }
+            
+            .nav-status-badge {
+                font-size: 9px !important;
+                padding: 3px 6px !important;
+            }
+
+            /* Auth Modal Responsiveness */
+            .modal-card {
+                padding: 24px 16px !important;
+                max-width: 90% !important;
+                width: 380px !important;
+            }
+            
+            .tabs-header {
+                gap: 16px !important;
+                margin-bottom: 16px !important;
+            }
+            
+            .tab-btn {
+                font-size: 13px !important;
+                padding: 8px 2px !important;
             }
         }

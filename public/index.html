@@ -23,19 +23,19 @@
             <!-- Navbar -->
             <nav class="landing-nav">
                 <a href="#" class="landing-logo" onclick="event.preventDefault()">Ryezenn Motion<span>.</span></a>
-                <div style="display: flex; align-items: center; gap: 12px;">
+                <div class="nav-right-container">
                     <!-- User logged in widget -->
-                    <div id="user-nav-widget" style="font-family: var(--font-mono); font-size: 11px; display: none; align-items: center; gap: 12px; background: rgba(255, 255, 255, 0.05); padding: 4px 12px; border-radius: var(--radius-sm); border: var(--color-border-hairline);">
-                        <span id="user-email-display" style="color: var(--color-text-dark); font-weight: 700; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="">user@gmail.com</span>
-                        <a onclick="switchView('user-dashboard')" style="color: var(--color-primary); cursor: pointer; font-weight: 700; text-decoration: none; display: flex; align-items: center; gap: 4px;"><i class="ti ti-dashboard"></i> Dashboard</a>
-                        <span style="color: rgba(255,255,255,0.15);">|</span>
-                        <a onclick="handleUserLogout()" style="color: var(--color-text-muted); cursor: pointer; text-decoration: none; display: flex; align-items: center; gap: 4px;"><i class="ti ti-logout"></i> Keluar</a>
+                    <div id="user-nav-widget" class="user-nav-widget-container" style="display: none;">
+                        <span id="user-email-display" class="user-nav-email">user@gmail.com</span>
+                        <a onclick="switchView('user-dashboard')" class="user-nav-link-dashboard"><i class="ti ti-user-circle"></i> <span>Dashboard</span></a>
+                        <span class="user-nav-divider">|</span>
+                        <a onclick="handleUserLogout()" class="user-nav-link-logout"><i class="ti ti-logout"></i> <span>Keluar</span></a>
                     </div>
                     <!-- User logged out widget -->
                     <div id="user-login-btn-wrapper">
-                        <button type="button" class="btn-mono" onclick="openUserAuthModal()" style="background-color: var(--color-primary); color: white; border: none; padding: 6px 14px; font-size: 10px; border-radius: var(--radius-sm); box-shadow: 0 4px 10px rgba(255, 94, 0, 0.25);">Login / Daftar</button>
+                        <button type="button" class="btn-mono btn-login-nav" onclick="openUserAuthModal()">Login / Daftar</button>
                     </div>
-                    <span class="pill-badge pill-success"><i class="ti ti-circle-filled"></i> ONLINE</span>
+                    <span class="pill-badge pill-success nav-status-badge"><i class="ti ti-circle-filled"></i> ONLINE</span>
                 </div>
             </nav>
 
@@ -259,11 +259,11 @@
             <!-- Nav -->
             <nav class="landing-nav">
                 <a href="#" class="landing-logo" onclick="event.preventDefault(); resetToLandingPage()">Ryezenn Motion<span>.</span></a>
-                <button type="button" class="btn-mono" onclick="resetToLandingPage()" style="background-color: var(--color-primary); color: white; border: none; padding: 6px 14px; font-size: 10px; border-radius: var(--radius-sm); box-shadow: 0 4px 10px rgba(255, 94, 0, 0.25);">Belanja Lagi</button>
+                <button type="button" class="btn-mono btn-login-nav" onclick="resetToLandingPage()">Belanja Lagi</button>
             </nav>
 
             <header class="hero-section" style="margin-bottom: 24px;">
-                <h1 class="hero-title" style="font-size: 32px; background: linear-gradient(135deg, #ffffff 40%, #ff8a00 85%, #ff5e00 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">Dashboard Saya</h1>
+                <h1 class="hero-title dashboard-hero-title" style="font-size: 32px;">Profil & Dashboard Saya</h1>
                 <p style="font-size: 13px; color: var(--color-text-muted);" id="user-dashboard-welcome">Memuat profil...</p>
             </header>
 
