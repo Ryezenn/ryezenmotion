@@ -688,7 +688,7 @@ app.post('/api/payment/create-qris', requireUserAuth, async (req, res) => {
     // Call Mustika Payment API
     const params = new URLSearchParams();
     params.append('amount', price.toString());
-    params.append('product_name', `Alight Motion Premium 1 Tahun (${qty} Akun)`);
+    params.append('product_name', `Ryezen Motion Premium 1 Tahun Qty ${qty}`);
     params.append('customer_name', email);
     params.append('expiry', expiryMins.toString());
     params.append('redirect_url', 'https://ryezennmotion.id');
