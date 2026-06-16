@@ -1422,22 +1422,22 @@ ryezennmotion.id — Instant Purchase Store`;
 
         function makeHistoryAccountHtml(acc, index, showHeader) {
             return `
-                <div style="margin-bottom: 12px; font-size: 12px; background: rgba(5, 8, 17, 0.4); border: var(--color-border-hairline); border-radius: var(--radius-md); padding: 14px;">
-                    ${showHeader ? `<div style="font-family: var(--font-mono); font-size: 10px; font-weight: 700; color: var(--color-primary); margin-bottom: 10px; border-bottom: 1px dashed rgba(255,255,255,0.06); padding-bottom: 6px;">AKUN #${index + 1}</div>` : ''}
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <div>
-                            <div style="font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; color: var(--color-text-muted); font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;"><i class="ti ti-mail" style="color:var(--color-primary)"></i> Gmail Akun</div>
-                            <div style="display: flex; align-items: center; justify-content: space-between; background-color: rgba(5, 8, 17, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-sm); padding: 10px 14px;">
-                                <span style="font-family: var(--font-mono); font-size: 12px; word-break: break-all; color: #ffffff;">${acc.gmail}</span>
-                                <button class="btn-credential-copy" onclick="copyValueToClipboard('${acc.gmail}', 'Gmail')" style="background: none; border: none; cursor: pointer; color: var(--color-primary); font-size: 16px; display: flex; align-items: center; justify-content: center; transition: color 0.2s;"><i class="ti ti-copy"></i></button>
+                <div class="credential-card">
+                    ${showHeader ? `<div class="credential-card-header">AKUN #${index + 1}</div>` : ''}
+                    <div class="credential-fields-container">
+                        <div class="credential-field">
+                            <div class="credential-field-label"><i class="ti ti-mail"></i> Gmail Akun</div>
+                            <div class="credential-field-value-row">
+                                <span class="credential-value">${acc.gmail}</span>
+                                <button class="btn-credential-copy" onclick="copyValueToClipboard('${acc.gmail}', 'Gmail')" title="Salin Gmail"><i class="ti ti-copy"></i></button>
                             </div>
                         </div>
                         
-                        <div>
-                            <div style="font-family: var(--font-mono); font-size: 9px; text-transform: uppercase; color: var(--color-text-muted); font-weight: 700; margin-bottom: 6px; display: flex; align-items: center; gap: 4px;"><i class="ti ti-link" style="color:var(--color-primary)"></i> Link Akses / Aktivasi</div>
-                            <div style="display: flex; align-items: center; justify-content: space-between; background-color: rgba(5, 8, 17, 0.6); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: var(--radius-sm); padding: 10px 14px;">
-                                <span style="font-family: var(--font-mono); font-size: 12px; word-break: break-all; color: var(--color-text-muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 250px;" title="${acc.link_akses}">${acc.link_akses}</span>
-                                <button class="btn-credential-copy" onclick="copyValueToClipboard('${acc.link_akses}', 'Link Akses')" style="background: none; border: none; cursor: pointer; color: var(--color-primary); font-size: 16px; display: flex; align-items: center; justify-content: center; transition: color 0.2s;"><i class="ti ti-copy"></i></button>
+                        <div class="credential-field">
+                            <div class="credential-field-label"><i class="ti ti-link"></i> Link Akses / Aktivasi</div>
+                            <div class="credential-field-value-row">
+                                <span class="credential-value link-value" title="${acc.link_akses}">${acc.link_akses}</span>
+                                <button class="btn-credential-copy" onclick="copyValueToClipboard('${acc.link_akses}', 'Link Akses')" title="Salin Link"><i class="ti ti-copy"></i></button>
                             </div>
                         </div>
                     </div>
@@ -1498,10 +1498,10 @@ ryezennmotion.id — Instant Purchase Store`;
                     ).join('');
 
                     return `
-                        <div class="license-card-premium" style="padding: 16px !important; margin-bottom: 12px; text-align: left;">
-                            <div style="font-family: var(--font-mono); font-size: 11px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255, 255, 255, 0.08); padding-bottom: 8px; margin-bottom: 12px;">
-                                <span style="font-weight: 700; color: var(--color-primary);">${tx.ref_no}</span>
-                                <span style="color: var(--color-text-muted);">${dateText}</span>
+                        <div class="license-ticket-item">
+                            <div class="ticket-header">
+                                <span class="ticket-ref"><i class="ti ti-ticket"></i> ${tx.ref_no}</span>
+                                <span class="ticket-date">${dateText}</span>
                             </div>
                             ${accountsHtml}
                         </div>
@@ -1759,10 +1759,19 @@ ryezennmotion.id — Instant Purchase Store`;
             const listEl = document.getElementById('user-dashboard-history-list');
             if (!listEl) return;
 
+            // Update profile membership pass statistics dynamically
+            const txCountEl = document.getElementById('user-stat-tx');
+            const qtyCountEl = document.getElementById('user-stat-qty');
+            if (txCountEl) txCountEl.textContent = list.length;
+            if (qtyCountEl) {
+                const totalQty = list.reduce((sum, tx) => sum + (tx.quantity || 1), 0);
+                qtyCountEl.textContent = totalQty;
+            }
+
             if (list.length === 0) {
                 listEl.innerHTML = `
-                    <div style="text-align: center; padding: 32px 0; color: var(--color-text-muted); font-family: var(--font-mono); font-size: 13px; border: var(--color-border-hairline); border-radius: var(--radius-lg); background-color: var(--color-surface-white);">
-                        <i class="ti ti-info-circle" style="font-size: 24px; color: var(--color-primary); display: block; margin-bottom: 8px;"></i>
+                    <div class="empty-history-box">
+                        <i class="ti ti-info-circle"></i>
                         Belum ada pembelian lisensi terdaftar.
                     </div>
                 `;
@@ -1787,10 +1796,10 @@ ryezennmotion.id — Instant Purchase Store`;
                 ).join('');
 
                 return `
-                    <div class="license-card-premium" style="padding: 16px !important; margin-bottom: 16px; text-align: left;">
-                        <div style="font-family: var(--font-mono); font-size: 11px; display: flex; justify-content: space-between; border-bottom: 1px dashed rgba(255, 255, 255, 0.08); padding-bottom: 8px; margin-bottom: 12px;">
-                            <span style="font-weight: 700; color: var(--color-primary);">${tx.ref_no}</span>
-                            <span style="color: var(--color-text-muted);">${dateText} (Qty: ${tx.quantity || 1})</span>
+                    <div class="license-ticket-item">
+                        <div class="ticket-header">
+                            <span class="ticket-ref"><i class="ti ti-ticket"></i> ${tx.ref_no}</span>
+                            <span class="ticket-date">${dateText} (Qty: ${tx.quantity || 1})</span>
                         </div>
                         ${accountsHtml}
                     </div>

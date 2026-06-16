@@ -22,20 +22,19 @@
         <div class="landing-container">
             <!-- Navbar -->
             <nav class="landing-nav">
-                <a href="#" class="landing-logo" onclick="event.preventDefault()">Ryezenn Motion<span>.</span></a>
+                <a href="#" class="landing-logo" onclick="event.preventDefault(); resetToLandingPage()">Ryezenn Motion<span class="logo-dot">.</span><span class="online-indicator-dot" title="Sistem Online"></span></a>
                 <div class="nav-right-container">
                     <!-- User logged in widget -->
                     <div id="user-nav-widget" class="user-nav-widget-container" style="display: none;">
                         <span id="user-email-display" class="user-nav-email">user@gmail.com</span>
-                        <a onclick="switchView('user-dashboard')" class="user-nav-link-dashboard"><i class="ti ti-user-circle"></i> <span>Dashboard</span></a>
+                        <a onclick="switchView('user-dashboard')" class="user-nav-link-dashboard" title="Dashboard"><i class="ti ti-user-circle"></i> <span>Dashboard</span></a>
                         <span class="user-nav-divider">|</span>
-                        <a onclick="handleUserLogout()" class="user-nav-link-logout"><i class="ti ti-logout"></i> <span>Keluar</span></a>
+                        <a onclick="handleUserLogout()" class="user-nav-link-logout" title="Keluar"><i class="ti ti-logout"></i> <span>Keluar</span></a>
                     </div>
                     <!-- User logged out widget -->
                     <div id="user-login-btn-wrapper">
-                        <button type="button" class="btn-mono btn-login-nav" onclick="openUserAuthModal()">Login / Daftar</button>
+                        <button type="button" class="btn-mono btn-login-nav" onclick="openUserAuthModal()"><i class="ti ti-user"></i> <span>Login / Daftar</span></button>
                     </div>
-                    <span class="pill-badge pill-success nav-status-badge"><i class="ti ti-circle-filled"></i> ONLINE</span>
                 </div>
             </nav>
 
@@ -258,8 +257,8 @@
         <div class="landing-container">
             <!-- Nav -->
             <nav class="landing-nav">
-                <a href="#" class="landing-logo" onclick="event.preventDefault(); resetToLandingPage()">Ryezenn Motion<span>.</span></a>
-                <button type="button" class="btn-mono btn-login-nav" onclick="resetToLandingPage()">Belanja Lagi</button>
+                <a href="#" class="landing-logo" onclick="event.preventDefault(); resetToLandingPage()">Ryezenn Motion<span class="logo-dot">.</span><span class="online-indicator-dot" title="Sistem Online"></span></a>
+                <button type="button" class="btn-mono btn-login-nav" onclick="resetToLandingPage()"><i class="ti ti-shopping-cart"></i> <span>Belanja Lagi</span></button>
             </nav>
 
             <header class="hero-section" style="margin-bottom: 24px;">
@@ -269,17 +268,59 @@
 
             <div class="divider" style="margin-bottom: 24px;"></div>
 
-            <!-- Profile Info Card -->
-            <div class="license-card-premium profile-info-card" style="background: rgba(13, 20, 33, 0.45); display: flex; align-items: center; gap: 20px; padding: 20px; width: 100%;">
-                <div style="width: 50px; height: 50px; border-radius: 50%; background: rgba(255, 94, 0, 0.1); border: 1px solid rgba(255, 94, 0, 0.35); display: flex; align-items: center; justify-content: center; color: var(--color-primary); font-size: 24px; flex-shrink: 0; animation: pulse-dot 3s infinite;">
-                    <i class="ti ti-user-circle"></i>
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 4px; text-align: left;">
-                    <h4 style="font-family: var(--font-display); font-size: 15px; font-weight: 700; color: #ffffff;">Informasi Akun Anda</h4>
-                    <div style="font-family: var(--font-mono); font-size: 12px; color: var(--color-text-muted); display: flex; flex-wrap: wrap; gap: 16px;">
-                        <span><strong style="color: #ffffff;">Email:</strong> <span id="user-profile-email">-</span></span>
-                        <span><strong style="color: #ffffff;">WhatsApp:</strong> <span id="user-profile-phone">-</span></span>
+            <!-- Profile Membership Pass (Modern & Custom) -->
+            <div class="profile-membership-pass">
+                <div class="pass-glow-overlay"></div>
+                <div class="pass-header">
+                    <div class="pass-avatar-wrapper">
+                        <div class="pass-avatar">
+                            <i class="ti ti-user-circle"></i>
+                            <span class="pass-status-badge">PRO</span>
+                        </div>
+                        <div class="pass-title-group">
+                            <h3 class="pass-user-title">Premium Member</h3>
+                            <span class="pass-user-status"><i class="ti ti-crown"></i> VIP Account</span>
+                        </div>
                     </div>
+                    <div class="pass-chip">
+                        <span class="chip-line"></span>
+                        <span class="chip-line"></span>
+                        <span class="chip-line"></span>
+                    </div>
+                </div>
+                <div class="pass-body">
+                    <div class="pass-info-grid">
+                        <div class="pass-info-item">
+                            <label><i class="ti ti-mail"></i> EMAIL MEMBER</label>
+                            <span id="user-profile-email">-</span>
+                        </div>
+                        <div class="pass-info-item">
+                            <label><i class="ti ti-brand-whatsapp"></i> KONTAK WHATSAPP</label>
+                            <span id="user-profile-phone">-</span>
+                        </div>
+                    </div>
+                    <div class="pass-stats-row">
+                        <div class="pass-stat-item">
+                            <span class="pass-stat-val" id="user-stat-tx">0</span>
+                            <label>Transaksi</label>
+                        </div>
+                        <div class="pass-stat-item">
+                            <span class="pass-stat-val" id="user-stat-qty">0</span>
+                            <label>Total Lisensi</label>
+                        </div>
+                        <div class="pass-stat-item">
+                            <span class="pass-stat-val status-active"><i class="ti ti-circle-filled"></i> Aktif</span>
+                            <label>Status</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="pass-actions">
+                    <button type="button" class="btn-pass-action btn-pass-shop" onclick="resetToLandingPage()">
+                        <i class="ti ti-shopping-cart"></i> Belanja Lagi
+                    </button>
+                    <button type="button" class="btn-pass-action btn-pass-logout" onclick="handleUserLogout()">
+                        <i class="ti ti-logout"></i> Keluar Sesi
+                    </button>
                 </div>
             </div>
 
