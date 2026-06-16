@@ -62,6 +62,9 @@
             overflow-x: hidden;
             position: relative;
             min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         /* Animated Glowing Mesh Background + Dot Overlay */
@@ -153,6 +156,65 @@
             color: var(--color-warning);
             border: 1px solid rgba(245, 158, 11, 0.25);
             box-shadow: 0 0 12px rgba(245, 158, 11, 0.1);
+        }
+
+        /* ------------------------------------------------------------- */
+        /* Social Community Badges                                        */
+        /* ------------------------------------------------------------- */
+        .social-community-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: flex-start;
+            margin-bottom: 24px;
+        }
+
+        .social-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-family: var(--font-sans);
+            font-size: 13px;
+            font-weight: 600;
+            padding: 10px 18px;
+            border-radius: 100px;
+            text-decoration: none;
+            letter-spacing: 0.01em;
+            transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-badge i {
+            font-size: 16px;
+            transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .social-badge:hover { transform: translateY(-2px); }
+        .social-badge:hover i { transform: scale(1.15); }
+
+        .social-badge-wa {
+            background-color: rgba(16, 185, 129, 0.08);
+            color: var(--color-success);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.05);
+        }
+        .social-badge-wa:hover {
+            background-color: rgba(16, 185, 129, 0.14);
+            border-color: rgba(16, 185, 129, 0.4);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.15);
+        }
+
+        .social-badge-dc {
+            background-color: rgba(59, 130, 246, 0.08);
+            color: var(--color-info);
+            border: 1px solid rgba(59, 130, 246, 0.25);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.05);
+        }
+        .social-badge-dc:hover {
+            background-color: rgba(59, 130, 246, 0.14);
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.15);
         }
 
         /* ------------------------------------------------------------- */
@@ -282,6 +344,13 @@
             gap: 16px;
         }
 
+        /* Right column: checkout + social proof */
+        .landing-checkout-col {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
         /* Sleek Glassmorphic Tab Container Card */
         .checkout-container-card {
             background: rgba(13, 20, 35, 0.45);
@@ -314,13 +383,16 @@
         @media (max-width: 992px) {
             .landing-grid {
                 grid-template-columns: 1fr;
-                gap: 40px;
+                gap: 32px;
             }
             .landing-container {
-                max-width: 600px;
+                max-width: 580px;
             }
             .checkout-container-card {
                 padding: 28px 24px;
+            }
+            .hero-title {
+                font-size: 48px;
             }
         }
 
@@ -2133,253 +2205,304 @@
             to { opacity: 0; transform: translateY(-10px); }
         }
 
-        /* ------------------------------------------------------------- */
-        /* RESPONSIVE LAYOUT FOR MOBILE SCREENS                          */
-        /* ------------------------------------------------------------- */
+        /* ============================================================= */
+        /* PREMIUM MOBILE RESPONSIVE SYSTEM — 768px / 576px / 480px      */
+        /* ============================================================= */
+
+        /* ─── 768px: Tablet & Mobile Transition ─────────────────────── */
         @media (max-width: 768px) {
-            /* Admin Panel Responsive Styling */
-            .admin-container {
-                flex-direction: column;
-                min-height: 100vh;
-            }
 
-            .admin-sidebar {
-                width: 100%;
-                padding: 16px 0;
-                border-bottom: var(--color-border-hairline);
-            }
+            /* == Admin Panel ================================================ */
+            .admin-container { flex-direction: column; }
+            .admin-sidebar   { width: 100%; padding: 12px 0; border-bottom: var(--color-border-hairline); }
+            .sidebar-brand   { padding: 0 16px 10px; display: flex; align-items: center; justify-content: space-between; border-bottom: none; margin-bottom: 10px; }
+            .sidebar-brand-sub { margin-top: 0; }
+            .sidebar-menu    { flex-direction: row; flex-wrap: wrap; gap: 6px; padding: 0 16px 6px; }
+            .sidebar-item    { width: auto; }
+            .sidebar-link    { padding: 6px 10px; font-size: 12px; }
+            .sidebar-footer  { display: none; }
+            .admin-topbar    { height: auto; padding: 14px 16px; flex-direction: column; gap: 10px; align-items: stretch; text-align: center; }
+            .topbar-actions  { flex-direction: column; gap: 8px; align-items: stretch; }
+            .btn-topbar-primary, .btn-back-shop { justify-content: center; }
+            .dashboard-grid  { grid-template-columns: 1fr; gap: 12px; }
+            .dashboard-row-2 { grid-template-columns: 1fr; gap: 16px; }
+            .layout-split    { grid-template-columns: 1fr; gap: 16px; }
+            .form-grid-2     { grid-template-columns: 1fr; gap: 12px; }
 
-            .sidebar-brand {
-                padding: 0 16px 12px 16px;
-                margin-bottom: 12px;
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                border-bottom: none;
+            /* == Auth Modal ================================================ */
+            .modal-card {
+                padding: 28px 20px;
+                max-width: calc(100vw - 32px);
+                width: 420px;
+                border-radius: var(--radius-md);
             }
+            .tabs-header { gap: 16px; margin-bottom: 16px; }
+            .tab-btn { font-size: 13px; padding: 8px 2px; }
 
-            .sidebar-brand-sub {
-                margin-top: 0;
+            /* == Landing Nav =============================================== */
+            .landing-nav {
+                padding: 12px 20px;
+                margin-bottom: 28px;
+                margin-top: 8px;
+                border-radius: 20px;
             }
+            .landing-logo { font-size: 18px; }
+            .nav-right-container { gap: 8px; }
+            .user-nav-widget-container { padding: 4px 10px; gap: 8px; }
+            .user-nav-email, .user-nav-divider { display: none; }
+            .user-nav-link-dashboard span, .user-nav-link-logout span { display: none; }
+            .user-nav-link-dashboard, .user-nav-link-logout { font-size: 17px; padding: 4px 2px; }
+            .btn-login-nav { padding: 7px 12px; font-size: 9px; letter-spacing: 0.06em; }
+            .nav-status-badge { font-size: 8px; padding: 4px 8px; letter-spacing: 0.04em; }
+        }
 
-            .sidebar-menu {
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 8px;
-                padding: 0 16px;
-            }
+        /* ─── 576px: Standard Mobile Portrait ───────────────────────── */
+        @media (max-width: 576px) {
 
-            .sidebar-item {
-                width: auto;
-            }
-
-            .sidebar-link {
-                padding: 6px 12px;
-                font-size: 12px;
-            }
-
-            .sidebar-footer {
-                display: none; /* Hide admin footer info on mobile top sidebar */
-            }
-
-            .admin-topbar {
-                height: auto;
-                padding: 16px;
-                flex-direction: column;
-                gap: 12px;
-                align-items: stretch;
-                text-align: center;
-            }
-
-            .topbar-actions {
-                flex-direction: column;
-                gap: 8px;
+            /* == Global Spacing ============================================ */
+            .landing-container {
+                padding: 12px 14px 70px 14px;
                 align-items: stretch;
             }
 
-            .btn-topbar-primary, .btn-back-shop {
-                justify-content: center;
-            }
-
-            /* Dashboard Grid & Subpages */
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .dashboard-row-2 {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .layout-split {
-                grid-template-columns: 1fr;
-                gap: 20px;
-            }
-
-            .form-grid-2 {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            /* Landing Navigation Mobile Responsiveness */
+            /* == Navigation Premium Treatment ============================== */
             .landing-nav {
                 padding: 10px 16px;
+                margin-bottom: 20px;
+                margin-top: 6px;
+                border-radius: 18px;
+                /* Frosted glass reinforcement */
+                background: rgba(8, 12, 24, 0.75);
+            }
+            .landing-logo { font-size: 17px; letter-spacing: -0.03em; }
+            .btn-login-nav { padding: 6px 11px; font-size: 8.5px; }
+            .nav-status-badge { font-size: 0; width: 28px; height: 28px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; box-shadow: 0 0 10px rgba(16, 185, 129, 0.25); }
+            .nav-status-badge i { font-size: 11px; margin: 0; }
+
+            /* == Hero Section ============================================== */
+            .hero-section { margin-bottom: 20px; }
+            .hero-eyebrow { font-size: 9.5px; padding: 5px 12px; letter-spacing: 0.12em; }
+            .hero-title {
+                font-size: 38px;
+                line-height: 1.08;
+                letter-spacing: -0.035em;
+                margin-bottom: 18px;
+            }
+            .hero-price-tag {
+                display: flex;
+                padding: 12px 20px;
+                border-radius: 16px;
+                width: 100%;
+                justify-content: center;
+                box-sizing: border-box;
+            }
+            .price-value { font-size: 32px; }
+            .price-currency { font-size: 16px; }
+            .price-duration { font-size: 13px; }
+
+            /* == Feature Cards – 2-column grid stays, just smaller ========= */
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
                 margin-bottom: 24px;
-                margin-top: 5px;
             }
-            
+            .feature-card {
+                padding: 16px 14px;
+                gap: 10px;
+                border-radius: 16px;
+            }
+            .feature-icon-wrapper {
+                width: 36px; height: 36px;
+                font-size: 17px;
+                border-radius: 10px;
+            }
+            .feature-card-title { font-size: 13px; }
+            .feature-card-desc  { font-size: 11.5px; line-height: 1.45; }
+
+            /* == Checkout Card ============================================= */
+            .checkout-container-card {
+                padding: 22px 18px 18px;
+                border-radius: 20px;
+            }
+            .card-tabs {
+                border-radius: 12px;
+                padding: 4px;
+                margin-bottom: 22px;
+            }
+            .card-tab-btn {
+                padding: 11px 6px;
+                font-size: 12px;
+                gap: 6px;
+                border-radius: 9px;
+            }
+            .card-tab-btn i { font-size: 15px; }
+
+            /* == Form Inputs =============================================== */
+            .input-group-premium { margin-bottom: 18px; }
+            .input-group-premium label { font-size: 9px; letter-spacing: 0.1em; margin-bottom: 6px; }
+            .input-group-premium .form-input-premium {
+                padding: 13px 16px 13px 44px;
+                font-size: 12.5px;
+                border-radius: 12px;
+            }
+            .input-group-premium .input-wrapper i { font-size: 16px; left: 14px; }
+
+            /* == Quantity Selector ========================================= */
+            .qty-selector { padding: 4px; border-radius: 12px; }
+            .qty-btn { width: 32px; height: 32px; font-size: 17px; }
+            .qty-input { width: 38px; font-size: 14px; }
+            .bulk-price-lbl { font-size: 8.5px; }
+            .bulk-price-val { font-size: 14px; }
+
+            /* == Notification Box ========================================== */
+            .notification-box-premium {
+                padding: 14px;
+                gap: 12px;
+                border-radius: 12px;
+                margin-bottom: 18px;
+            }
+            .notification-box-premium i { font-size: 18px; }
+
+            /* == CTA Button ================================================ */
+            .btn-cta {
+                height: 50px;
+                font-size: 13px;
+                letter-spacing: 0.05em;
+                border-radius: 12px;
+            }
+            .security-badge { font-size: 11px; margin-top: 14px; }
+
+            /* == Stats Grid Row ============================================ */
+            .stats-grid-row {
+                grid-template-columns: 1fr;
+                gap: 12px;
+                margin-top: 16px;
+            }
+            .recent-buyers-section {
+                padding: 16px 14px;
+                border-radius: 18px;
+            }
+            .buyer-row { font-size: 11px; padding: 9px 10px; }
+            .buyer-email { max-width: 130px; }
+            .buyer-time { font-size: 10px; padding: 2px 6px; }
+
+            /* == Footer ==================================================== */
+            .landing-footer { margin-top: 36px; font-size: 10.5px; gap: 8px; }
+
+            /* == Success & Credentials ==================================== */
+            .success-view-container {
+                margin: 16px 0;
+                padding: 28px 18px;
+                border-radius: 20px;
+            }
+            .delivery-credentials-card { padding: 16px 14px; margin: 18px 0; border-radius: 16px; }
+
+            /* == Customer Dashboard ======================================= */
+            .profile-info-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 14px;
+            }
+
+            /* == Auth Modal =============================================== */
+            .modal-card {
+                padding: 24px 16px;
+                max-width: calc(100vw - 24px);
+                width: 100%;
+                border-radius: 20px;
+            }
+        }
+
+        /* ─── 420px: Compact / Small Phones ─────────────────────────── */
+        @media (max-width: 420px) {
+
+            .landing-container { padding: 8px 10px 64px; }
+
+            /* == Nav: ultra-compact ======================================== */
+            .landing-nav {
+                padding: 9px 12px;
+                margin-bottom: 16px;
+                border-radius: 16px;
+            }
             .landing-logo {
-                font-size: 16px !important;
+                font-size: 15px;
+                letter-spacing: -0.03em;
             }
-            
-            .nav-right-container {
-                gap: 6px !important;
+            .landing-logo span { font-size: 22px; }
+            .nav-right-container { gap: 6px; }
+            .btn-login-nav { padding: 5px 9px; font-size: 8px; border-radius: 7px; }
+            .nav-status-badge { width: 24px; height: 24px; box-shadow: 0 0 8px rgba(16,185,129,0.2); }
+            .nav-status-badge i { font-size: 9px; }
+            .user-nav-widget-container { padding: 3px 7px; gap: 6px; }
+            .user-nav-link-dashboard, .user-nav-link-logout { font-size: 15px; }
+
+            /* == Hero ====================================================== */
+            .hero-title { font-size: 33px; }
+            .hero-eyebrow { font-size: 9px; padding: 4px 10px; }
+
+            /* == Features: single column on very small screens ============= */
+            .features-grid { grid-template-columns: 1fr; gap: 10px; }
+            .feature-card { padding: 14px 12px; flex-direction: row; align-items: flex-start; gap: 12px; }
+            .feature-icon-wrapper { flex-shrink: 0; width: 34px; height: 34px; font-size: 16px; }
+            .feature-card-title { font-size: 12.5px; }
+            .feature-card-desc { font-size: 11px; }
+
+            /* == Price tag: full-width ===================================== */
+            .hero-price-tag { padding: 10px 16px; border-radius: 14px; }
+            .price-value { font-size: 28px; }
+
+            /* == Tabs ====================================================== */
+            .card-tabs { border-radius: 11px; padding: 3px; }
+            .card-tab-btn { padding: 10px 2px; font-size: 11px; gap: 4px; border-radius: 8px; }
+            .card-tab-btn i { font-size: 14px; }
+
+            /* == Inputs ==================================================== */
+            .input-group-premium .form-input-premium { padding: 12px 14px 12px 40px; font-size: 12px; }
+            .input-group-premium .input-wrapper i { font-size: 15px; left: 12px; }
+
+            /* == Qty ======================================================= */
+            .qty-btn { width: 30px; height: 30px; font-size: 16px; }
+            .qty-input { width: 34px; font-size: 13px; }
+            .bulk-price-val { font-size: 13px; }
+
+            /* == CTA ======================================================= */
+            .btn-cta { height: 48px; font-size: 12.5px; border-radius: 11px; }
+
+            /* == Checkout Card ============================================= */
+            .checkout-container-card { padding: 18px 14px 16px; border-radius: 18px; }
+        }
+
+        /* ============================================================= */
+        /* MOBILE TOUCH & INTERACTIVE POLISH                              */
+        /* ============================================================= */
+        @media (max-width: 768px) {
+            /* Remove tap highlight on all interactive elements */
+            button, a, input, .feature-card, .checkout-container-card {
+                -webkit-tap-highlight-color: transparent;
             }
-            
-            .user-nav-widget-container {
-                padding: 4px 8px;
+
+            /* Larger minimum touch targets */
+            .qty-btn, .card-tab-btn, .btn-cta, .btn-login-nav {
+                touch-action: manipulation;
+            }
+
+            /* Social badges on mobile: slightly smaller, still full-width flex */
+            .social-community-links {
                 gap: 8px;
             }
-            
-            .user-nav-email, 
-            .user-nav-divider {
-                display: none !important; /* Hide email and vertical pipe on small screens */
+            .social-badge {
+                padding: 9px 16px;
+                font-size: 12px;
             }
-            
-            .user-nav-link-dashboard span,
-            .user-nav-link-logout span {
-                display: none !important; /* Hide text, only show icons for clean fit */
-            }
-            
-            .user-nav-link-dashboard,
-            .user-nav-link-logout {
-                font-size: 15px; /* Larger icons for easy touch target */
-                padding: 4px;
-            }
-            
-            .btn-login-nav {
-                padding: 4px 8px !important;
-                font-size: 9px !important;
-            }
-            
-            .nav-status-badge {
-                font-size: 9px !important;
-                padding: 3px 6px !important;
-            }
+            .social-badge i { font-size: 15px; }
 
-            /* Auth Modal Responsiveness */
-            .modal-card {
-                padding: 24px 16px !important;
-                max-width: 90% !important;
-                width: 380px !important;
-            }
-            
-            .tabs-header {
-                gap: 16px !important;
-                margin-bottom: 16px !important;
-            }
-            
-            .tab-btn {
-                font-size: 13px !important;
-                padding: 8px 2px !important;
-            }
+            /* Disable hover effects (transform) on touch devices to prevent stuck states */
+            .feature-card:hover { transform: none; }
+            .social-badge:hover { transform: none; }
+            .btn-cta:hover:not(:disabled) { transform: none; box-shadow: 0 6px 20px rgba(255, 94, 0, 0.3); }
         }
 
-        /* ------------------------------------------------------------- */
-        /* EXTRA MOBILE RESPONSIVENESS FIXES (max-width: 576px / 480px) */
-        /* ------------------------------------------------------------- */
         @media (max-width: 576px) {
-            .landing-container {
-                padding: 16px 12px 60px 12px !important;
-            }
-            
-            .checkout-container-card {
-                padding: 20px 16px !important;
-            }
-            
-            .recent-buyers-section {
-                padding: 16px 12px !important;
-            }
-
-            .profile-info-card {
-                flex-direction: column !important;
-                align-items: flex-start !important;
-                gap: 12px !important;
-            }
-            
-            .success-view-container {
-                margin: 20px 12px !important;
-                padding: 28px 20px !important;
-                border-radius: var(--radius-md) !important;
-            }
-            
-            .delivery-credentials-card {
-                padding: 16px !important;
-                margin: 20px 0 !important;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .landing-logo {
-                font-size: 14px !important;
-            }
-            
-            .landing-nav {
-                padding: 10px 12px !important;
-            }
-
-            .nav-status-badge {
-                font-size: 0 !important; /* Hide "STATUS: ONLINE" / "STATUS: STOK HABIS" text */
-                padding: 6px !important;
-                width: 24px !important;
-                height: 24px !important;
-                display: inline-flex !important;
-                align-items: center !important;
-                justify-content: center !important;
-                border-radius: 50% !important;
-                box-shadow: 0 0 8px rgba(16, 185, 129, 0.2) !important;
-            }
-
-            .nav-status-badge i {
-                font-size: 10px !important;
-                margin: 0 !important;
-            }
-
-            .hero-title {
-                font-size: 32px !important;
-            }
-
-            .price-value {
-                font-size: 28px !important;
-            }
-
-            .card-tab-btn {
-                padding: 10px 4px !important;
-                font-size: 11px !important;
-                gap: 4px !important;
-            }
-
-            .card-tab-btn i {
-                font-size: 14px !important;
-            }
-            
-            .qty-selector {
-                padding: 3px !important;
-            }
-            
-            .qty-btn {
-                width: 30px !important;
-                height: 30px !important;
-                font-size: 16px !important;
-            }
-            
-            .qty-input {
-                width: 36px !important;
-                font-size: 14px !important;
-            }
-            
-            .bulk-price-val {
-                font-size: 13px !important;
-            }
-        }
+            .social-badge { padding: 8px 14px; font-size: 11.5px; }
+            .social-badge i { font-size: 14px; }
+        }
