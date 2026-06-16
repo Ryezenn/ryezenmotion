@@ -14,15 +14,19 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Connection to MongoDB
-mongoose.connect(process.env.MONGODB_URI)
-  .then(() => {
-    console.log('MongoDB Atlas Connected successfully');
-    seedData();
-  })
-  .catch(err => {
-    console.error('MongoDB connection error:', err);
-  });
+// Connection to MongoDB (non-blocking at startup)
+if (process.env.MONGODB_URI) {
+  mongoose.connect(process.env.MONGODB_URI)
+    .then(() => {
+      console.log('MongoDB Atlas Connected successfully at startup');
+      seedData();
+    })
+    .catch(err => {
+      console.error('MongoDB connection error at startup:', err);
+    });
+} else {
+  console.warn('Warning: MONGODB_URI is not defined in environment variables.');
+}
 
 // ================= DATABASE SCHEMAS & MODELS =================
 
@@ -244,6 +248,37 @@ const requireAdminAuth = (req, res, next) => {
     res.status(401).json({ error: 'Akses ditolak. Silakan login kembali sebagai admin.' });
   }
 };
+
+// Middleware to ensure MongoDB connection on every API request (important for Serverless/Vercel)
+app.use('/api', async (req, res, next) => {
+  if (!process.env.MONGODB_URI) {
+    return res.status(500).json({ error: 'Konfigurasi database MONGODB_URI tidak ditemukan di server.' });
+  }
+  
+  if (mongoose.connection.readyState !== 1) {
+    console.log('MongoDB not connected. Re-connecting on-demand...');
+    try {
+      await mongoose.connect(process.env.MONGODB_URI);
+      console.log('MongoDB connected successfully on-demand');
+      await seedData();
+    } catch (err) {
+      console.error('MongoDB connection error on-demand:', err);
+      return res.status(500).json({ error: 'Gagal terhubung ke database: ' + err.message });
+    }
+  }
+  next();
+});
+
+// Health check endpoint for deployment debugging
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    vercel: !!process.env.VERCEL,
+    hasMongoUri: !!process.env.MONGODB_URI,
+    mongoState: mongoose.connection.readyState,
+    mongoStateLabel: ['disconnected', 'connected', 'connecting', 'disconnecting'][mongoose.connection.readyState]
+  });
+});
 
 // --- ACCOUNTS API ---
 
