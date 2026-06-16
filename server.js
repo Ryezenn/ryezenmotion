@@ -696,7 +696,8 @@ app.post('/api/payment/create-qris', requireUserAuth, async (req, res) => {
     const mustikaRes = await axios.post('https://mustikapayment.com/api/v1/create/qris', params, {
       headers: {
         'X-Api-Key': process.env.MUSTIKA_API_KEY,
-        'Content-Type': 'application/x-www-form-urlencoded'
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
       }
     });
 
@@ -754,7 +755,8 @@ app.get('/api/payment/check-status/:ref_no', async (req, res) => {
     // Call Mustika Payment status API
     const checkRes = await axios.get(`https://mustikapayment.com/api/v1/check/qris?ref_no=${ref_no}`, {
       headers: {
-        'X-Api-Key': process.env.MUSTIKA_API_KEY
+        'X-Api-Key': process.env.MUSTIKA_API_KEY,
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
       }
     });
 
