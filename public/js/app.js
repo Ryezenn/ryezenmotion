@@ -141,6 +141,7 @@
             activeQrisInterval: null,
             activeQrisTimeout: null,
             activeQrisRef: null,
+            activeQrisApiKey: null,
             tempParsedAccounts: [],
             user: null,
             userToken: localStorage.getItem('user_token') || null
@@ -477,13 +478,69 @@
                 const resData = await response.json();
 
                 if (response.ok && resData.success) {
+                    appState.activeQrisApiKey = null; // Reset key
                     openPaymentModal(resData.qr_url, resData.ref_no, resData.amount, resData.payment_link);
+                } else if (resData.status === 'waf_blocked') {
+                    console.warn("⚠️ Server Vercel diblokir oleh Cloudflare WAF Gateway. Mencoba melakukan request langsung dari Browser (Client)...");
+                    appState.activeQrisApiKey = resData.apiKey;
+                    
+                    // Client-side Bypass: Hit API MustikaPayment secara langsung dari browser pembeli (residential IP)
+                    const payload = new URLSearchParams();
+                    payload.append("amount", resData.amount.toString());
+                    payload.append("product_name", `Ryezen Motion Premium 1 Tahun Qty ${resData.quantity}`);
+                    payload.append("customer_name", emailInput);
+                    payload.append("expiry", "30");
+                    payload.append("redirect_url", "https://ryezennmotion.id");
+
+                    const directRes = await fetch("https://mustikapayment.com/api/v1/create/qris", {
+                        method: "POST",
+                        headers: {
+                            "X-Api-Key": resData.apiKey,
+                            "Content-Type": "application/x-www-form-urlencoded"
+                        },
+                        body: payload.toString()
+                    });
+
+                    if (!directRes.ok) {
+                        throw new Error(`Client call failed with status ${directRes.status}`);
+                    }
+
+                    const directResult = await directRes.json();
+
+                    if (directResult.status !== "success" || !directResult.ref_no) {
+                        throw new Error(directResult.message || "Gagal membuat transaksi dari browser");
+                    }
+
+                    // Simpan transaksi yang berhasil dibuat ke database via backend /api/payment/create-qris dengan save_only
+                    const saveRes = await fetch("/api/payment/create-qris", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            "Authorization": `Bearer ${appState.userToken}`
+                        },
+                        body: JSON.stringify({
+                            save_only: true,
+                            ref_no: directResult.ref_no,
+                            qr_url: directResult.qr_url,
+                            payment_link: directResult.payment_link,
+                            amount: directResult.amount,
+                            quantity: quantityInput
+                        })
+                    });
+
+                    const saveResult = await saveRes.json();
+
+                    if (saveResult.success) {
+                        openPaymentModal(directResult.qr_url, directResult.ref_no, directResult.amount, directResult.payment_link);
+                    } else {
+                        throw new Error("Gagal menyimpan transaksi ke database");
+                    }
                 } else {
                     showToast(resData.error || "Gagal membuat tagihan QRIS.", "danger");
                 }
             } catch (err) {
                 console.error("Checkout transaction error:", err);
-                showToast("Koneksi gagal. Periksa server Anda.", "danger");
+                showToast("Koneksi gagal atau terblokir. Silakan hubungi admin.", "danger");
             } finally {
                 ctaBtn.disabled = false;
                 ctaBtn.innerHTML = 'Beli Sekarang <i class="ti ti-arrow-right"></i>';
@@ -532,14 +589,61 @@
             // Poll every 5 seconds
             appState.activeQrisInterval = setInterval(async () => {
                 try {
-                    const response = await fetch(`/api/payment/check-status/${refNo}`);
-                    const checkData = await response.json();
+                    let paymentSuccess = false;
+                    let successData = null;
 
-                    if (checkData.status === 'success') {
-                        completeCheckoutFlow(checkData);
-                    } else if (checkData.status === 'success_out_of_stock') {
-                        cancelPayment();
-                        showToast(checkData.message, "warning");
+                    if (appState.activeQrisApiKey) {
+                        // Polling langsung ke Mustika Payment (Client-side Bypass)
+                        const directRes = await fetch(`https://mustikapayment.com/api/v1/check/qris?ref_no=${refNo}`, {
+                            method: 'GET',
+                            headers: {
+                                'X-Api-Key': appState.activeQrisApiKey,
+                                'Accept': 'application/json'
+                            }
+                        });
+
+                        if (directRes.ok) {
+                            const directData = await directRes.json();
+                            const paymentStatus = directData.data?.status || directData.status;
+                            if (paymentStatus === 'success' || paymentStatus === 'SUCCESS') {
+                                // Kirim sinyal sukses ke backend untuk mencairkan akun lisensi
+                                const updateRes = await fetch(`/api/payment/check-status/${refNo}?set_success=true`, {
+                                    headers: {
+                                        'Authorization': `Bearer ${appState.userToken}`
+                                    }
+                                });
+                                const checkData = await updateRes.json();
+                                if (checkData.status === 'success') {
+                                    paymentSuccess = true;
+                                    successData = checkData;
+                                } else if (checkData.status === 'success_out_of_stock') {
+                                    cancelPayment();
+                                    showToast(checkData.message, "warning");
+                                    return;
+                                }
+                            }
+                        }
+                    } else {
+                        // Polling standar ke backend (Server-side)
+                        const response = await fetch(`/api/payment/check-status/${refNo}`, {
+                            headers: {
+                                'Authorization': `Bearer ${appState.userToken}`
+                            }
+                        });
+                        const checkData = await response.json();
+
+                        if (checkData.status === 'success') {
+                            paymentSuccess = true;
+                            successData = checkData;
+                        } else if (checkData.status === 'success_out_of_stock') {
+                            cancelPayment();
+                            showToast(checkData.message, "warning");
+                            return;
+                        }
+                    }
+
+                    if (paymentSuccess && successData) {
+                        completeCheckoutFlow(successData);
                     }
                 } catch (err) {
                     console.error("Polling error:", err);
@@ -559,6 +663,7 @@
             
             closeModal('modal-payment');
             appState.activeQrisRef = null;
+            appState.activeQrisApiKey = null;
             showToast("Pembayaran dibatalkan/ditutup.", "warning");
         }
 

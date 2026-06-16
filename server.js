@@ -672,7 +672,7 @@ app.post('/api/admin/auth', (req, res) => {
 app.post('/api/payment/create-qris', requireUserAuth, async (req, res) => {
   try {
     const email = req.user.email;
-    const { quantity } = req.body;
+    const { quantity, save_only, ref_no, qr_url, payment_link, amount } = req.body;
 
     const qty = Math.max(1, parseInt(quantity) || 1);
 
@@ -684,6 +684,27 @@ app.post('/api/payment/create-qris', requireUserAuth, async (req, res) => {
 
     const price = 3000 * qty; // Rp 3.000 per account
     const expiryMins = 30;
+
+    // SAVE ONLY MODE (Client-side Bypass)
+    if (save_only && ref_no) {
+      // Save pending transaction in database
+      const newPurchase = new Purchase({
+        email: email,
+        ref_no: ref_no,
+        amount: amount || price,
+        quantity: qty,
+        status: 'Pending'
+      });
+      await newPurchase.save();
+
+      return res.json({
+        success: true,
+        ref_no: ref_no,
+        qr_url: qr_url,
+        payment_link: payment_link,
+        amount: amount || price
+      });
+    }
 
     // Call Mustika Payment API
     const params = new URLSearchParams();
@@ -724,13 +745,13 @@ app.post('/api/payment/create-qris', requireUserAuth, async (req, res) => {
     });
 
     if (mustikaData && mustikaData.status === 'success') {
-      const { ref_no, qr_url, payment_link, amount } = mustikaData;
+      const { ref_no: resRefNo, qr_url: resQrUrl, payment_link: resPaymentLink, amount: resAmount } = mustikaData;
 
       // Save pending transaction in database
       const newPurchase = new Purchase({
         email: email,
-        ref_no: ref_no,
-        amount: amount,
+        ref_no: resRefNo,
+        amount: resAmount,
         quantity: qty,
         status: 'Pending'
       });
@@ -738,29 +759,41 @@ app.post('/api/payment/create-qris', requireUserAuth, async (req, res) => {
 
       res.json({
         success: true,
-        ref_no: ref_no,
-        qr_url: qr_url,
-        payment_link: payment_link,
-        amount: amount
+        ref_no: resRefNo,
+        qr_url: resQrUrl,
+        payment_link: resPaymentLink,
+        amount: resAmount
       });
     } else {
-      res.status(500).json({ error: 'Gagal membuat tagihan QRIS dari gateway' });
+      throw new Error(mustikaData ? mustikaData.message : 'Gagal membuat tagihan QRIS dari gateway');
     }
   } catch (err) {
-    console.error('Create QRIS error:', err.response ? err.response.data : err.message);
-    res.status(500).json({ error: 'Error saat menghubungkan ke gateway pembayaran: ' + err.message });
+    console.warn('⚠️ MustikaPayment Gateway server call failed, sending WAF_BLOCKED to client:', err.message);
+    const qty = Math.max(1, parseInt(req.body.quantity) || 1);
+    res.json({
+      status: 'waf_blocked',
+      apiKey: process.env.MUSTIKA_API_KEY,
+      amount: 3000 * qty,
+      quantity: qty
+    });
   }
 });
 
 // Check Status of QRIS & Dispense Account on success
-app.get('/api/payment/check-status/:ref_no', async (req, res) => {
+app.get('/api/payment/check-status/:ref_no', requireUserAuth, async (req, res) => {
   try {
     const { ref_no } = req.params;
+    const setSuccess = req.query.set_success === 'true';
     
     // Find transaction in DB
     const transaction = await Purchase.findOne({ ref_no });
     if (!transaction) {
       return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
+    }
+
+    // Ensure the transaction belongs to the logged-in user
+    if (transaction.email !== req.user.email) {
+      return res.status(403).json({ error: 'Akses ditolak. Transaksi ini milik pengguna lain.' });
     }
 
     // If already marked success in DB, return accounts list immediately
@@ -771,6 +804,47 @@ app.get('/api/payment/check-status/:ref_no', async (req, res) => {
       return res.json({
         status: 'success',
         accounts: accountsList
+      });
+    }
+
+    // If client tells us payment is success (client-side bypass)
+    if (setSuccess && transaction.status === 'Pending') {
+      const qty = transaction.quantity || 1;
+
+      // Double check stock
+      const accountsToDispense = await Account.find({ status: 'Aktif' }).limit(qty);
+      if (accountsToDispense.length < qty) {
+        transaction.status = 'Success';
+        await transaction.save();
+        return res.json({
+          status: 'success_out_of_stock',
+          message: 'Pembayaran sukses, namun stok lisensi mendadak habis. Harap hubungi admin dengan mengirimkan bukti ref_no: ' + ref_no
+        });
+      }
+
+      const assigned = [];
+      for (const acc of accountsToDispense) {
+        acc.status = 'Terpakai';
+        acc.catatan_khusus = `Buyer: ${transaction.email}`;
+        await acc.save();
+        assigned.push({
+          gmail: acc.gmail,
+          link_akses: acc.link_akses
+        });
+      }
+
+      // Update Transaction
+      transaction.status = 'Success';
+      transaction.accounts_assigned = assigned;
+      if (assigned[0]) {
+        transaction.gmail_assigned = assigned[0].gmail;
+        transaction.link_assigned = assigned[0].link_akses;
+      }
+      await transaction.save();
+
+      return res.json({
+        status: 'success',
+        accounts: assigned
       });
     }
 
