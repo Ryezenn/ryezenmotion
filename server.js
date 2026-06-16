@@ -693,16 +693,20 @@ app.post('/api/payment/create-qris', requireUserAuth, async (req, res) => {
     params.append('redirect_url', 'https://ryezennmotion.id');
 
     console.log(`Sending request to Mustika Payment for ${qty} account(s)...`);
-    const mustikaRes = await axios.post('https://mustikapayment.com/api/v1/create/qris', params, {
+    const mustikaRes = await fetch('https://mustikapayment.com/api/v1/create/qris', {
+      method: 'POST',
       headers: {
         'X-Api-Key': process.env.MUSTIKA_API_KEY,
         'Content-Type': 'application/x-www-form-urlencoded',
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-      }
+      },
+      body: params.toString()
     });
 
-    if (mustikaRes.data && mustikaRes.data.status === 'success') {
-      const { ref_no, qr_url, payment_link, amount } = mustikaRes.data;
+    const mustikaData = await mustikaRes.json();
+
+    if (mustikaRes.ok && mustikaData && mustikaData.status === 'success') {
+      const { ref_no, qr_url, payment_link, amount } = mustikaData;
 
       // Save pending transaction in database
       const newPurchase = new Purchase({
@@ -753,14 +757,17 @@ app.get('/api/payment/check-status/:ref_no', async (req, res) => {
     }
 
     // Call Mustika Payment status API
-    const checkRes = await axios.get(`https://mustikapayment.com/api/v1/check/qris?ref_no=${ref_no}`, {
+    const checkRes = await fetch(`https://mustikapayment.com/api/v1/check/qris?ref_no=${ref_no}`, {
+      method: 'GET',
       headers: {
         'X-Api-Key': process.env.MUSTIKA_API_KEY,
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
       }
     });
 
-    if (checkRes.data && checkRes.data.status === 'success') {
+    const checkData = await checkRes.json();
+
+    if (checkRes.ok && checkData && checkData.status === 'success') {
       const qty = transaction.quantity || 1;
 
       // Double check stock
