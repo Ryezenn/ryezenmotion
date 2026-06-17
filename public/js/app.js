@@ -243,23 +243,35 @@
                 targetSubpage.classList.add('active');
             }
 
-            // Update active sidebar nav link style
-            if (navElement) {
-                const navLinks = document.querySelectorAll('.sidebar-link');
-                navLinks.forEach(link => link.classList.remove('active'));
-                navElement.classList.add('active');
-            } else {
-                // Find and highlight matching sidebar link manually
-                const navLinks = document.querySelectorAll('.sidebar-link');
-                navLinks.forEach(link => {
-                    const text = link.textContent.trim().toLowerCase();
-                    if (text.includes(subpageId.replace('-', ' '))) {
-                        link.classList.add('active');
-                    } else {
-                        link.classList.remove('active');
-                    }
-                });
-            }
+             // Update active sidebar nav link style
+             if (navElement) {
+                 const navLinks = document.querySelectorAll('.sidebar-link');
+                 navLinks.forEach(link => link.classList.remove('active'));
+                 navElement.classList.add('active');
+             } else {
+                 // Find and highlight matching sidebar link manually
+                 const navLinks = document.querySelectorAll('.sidebar-link');
+                 navLinks.forEach(link => {
+                     const text = link.textContent.trim().toLowerCase();
+                     if (text.includes(subpageId.replace('-', ' '))) {
+                         link.classList.add('active');
+                     } else {
+                         link.classList.remove('active');
+                     }
+                 });
+             }
+
+             // Sync with Mobile Scrollable Tab Bar if it exists
+             const mobTabs = document.querySelectorAll('.admin-mob-tab');
+             mobTabs.forEach(tab => {
+                 if (tab.id === `mob-tab-${subpageId}`) {
+                     tab.classList.add('active');
+                     // Scroll the tab into view inside the tab bar container
+                     tab.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                 } else {
+                     tab.classList.remove('active');
+                 }
+             });
 
             if (subpageId === 'riwayat-pembelian') {
                 fetchAdminPurchases();
