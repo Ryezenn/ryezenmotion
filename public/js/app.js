@@ -412,11 +412,27 @@
 
                     const pricePreview = document.getElementById('bulk-price-preview');
                     const qtyInput = document.getElementById('purchase-qty');
+                    const stockStatus = document.getElementById('purchase-stock-status');
+
+                    if (stockStatus) {
+                        if (stock > 0) {
+                            stockStatus.textContent = `Stok: ${stock}`;
+                            stockStatus.style.color = 'var(--color-success)';
+                            stockStatus.style.borderColor = 'rgba(46, 213, 115, 0.2)';
+                            stockStatus.style.background = 'rgba(46, 213, 115, 0.05)';
+                        } else {
+                            stockStatus.textContent = `Stok Habis`;
+                            stockStatus.style.color = 'var(--color-danger)';
+                            stockStatus.style.borderColor = 'rgba(239, 68, 68, 0.2)';
+                            stockStatus.style.background = 'rgba(239, 68, 68, 0.05)';
+                        }
+                    }
+
                     if (qtyInput) {
                         const currentQty = parseInt(qtyInput.value) || 1;
                         const totalPrice = 3000 * currentQty;
                         if (pricePreview) {
-                            pricePreview.innerHTML = `Stok: ${stock} · Total: Rp ${totalPrice.toLocaleString('id-ID')}`;
+                            pricePreview.innerHTML = `Rp ${totalPrice.toLocaleString('id-ID')}`;
                         }
                     }
                 }
@@ -1385,7 +1401,15 @@ ryezennmotion.id — Instant Purchase Store`;
             
             // Update price preview
             const totalPrice = 3000 * targetQty;
-            document.getElementById('bulk-price-preview').innerHTML = `Stok: ${availableStock} · Total: Rp ${totalPrice.toLocaleString('id-ID')}`;
+            const pricePreview = document.getElementById('bulk-price-preview');
+            if (pricePreview) {
+                pricePreview.innerHTML = `Rp ${totalPrice.toLocaleString('id-ID')}`;
+            }
+            
+            const stockStatus = document.getElementById('purchase-stock-status');
+            if (stockStatus) {
+                stockStatus.textContent = `Stok: ${availableStock}`;
+            }
         }
 
         // -------------------------------------------------------------
