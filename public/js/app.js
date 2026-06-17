@@ -311,11 +311,16 @@
                 if (response.ok) {
                     appState.settings = data;
                     
-                    // Render settings preview elements
-                    document.getElementById('dashboard-note-text').textContent = data.global_note || 'Tidak ada catatan global';
-                    document.getElementById('global-note-textarea').value = data.global_note || '';
-                    document.getElementById('note-preview-display').textContent = data.global_note || 'Tidak ada catatan global';
-                    document.getElementById('delivery-note').textContent = data.global_note || '';
+                    // Render settings preview elements with safety checks
+                    const noteTextEl = document.getElementById('dashboard-note-text');
+                    const noteTextareaEl = document.getElementById('global-note-textarea');
+                    const notePreviewEl = document.getElementById('note-preview-display');
+                    const deliveryNoteEl = document.getElementById('delivery-note');
+                    
+                    if (noteTextEl) noteTextEl.textContent = data.global_note || 'Tidak ada catatan global';
+                    if (noteTextareaEl) noteTextareaEl.value = data.global_note || '';
+                    if (notePreviewEl) notePreviewEl.textContent = data.global_note || 'Tidak ada catatan global';
+                    if (deliveryNoteEl) deliveryNoteEl.textContent = data.global_note || '';
                     
                     renderStepsPreview();
                 }
@@ -381,21 +386,25 @@
                     const badge = document.querySelector('.landing-nav .pill-badge');
                     const ctaBtn = document.querySelector('.btn-cta');
                     
-                    if (stock > 0) {
-                        badge.className = 'pill-badge pill-success';
-                        badge.innerHTML = '<i class="ti ti-circle-filled"></i> STATUS: ONLINE';
-                        if (ctaBtn) {
+                    if (badge) {
+                        if (stock > 0) {
+                            badge.className = 'pill-badge pill-success';
+                            badge.innerHTML = '<i class="ti ti-circle-filled"></i> STATUS: ONLINE';
+                        } else {
+                            badge.className = 'pill-badge pill-danger';
+                            badge.innerHTML = '<i class="ti ti-circle-filled"></i> STATUS: STOK HABIS';
+                        }
+                    }
+                    
+                    if (ctaBtn) {
+                        if (stock > 0) {
                             ctaBtn.disabled = false;
                             if (appState.user) {
                                 ctaBtn.innerHTML = 'Beli Sekarang <i class="ti ti-arrow-right"></i>';
                             } else {
                                 ctaBtn.innerHTML = 'Login / Daftar untuk Membeli <i class="ti ti-lock"></i>';
                             }
-                        }
-                    } else {
-                        badge.className = 'pill-badge pill-danger';
-                        badge.innerHTML = '<i class="ti ti-circle-filled"></i> STATUS: STOK HABIS';
-                        if (ctaBtn) {
+                        } else {
                             ctaBtn.disabled = true;
                             ctaBtn.innerHTML = 'Stok Habis';
                         }
@@ -403,11 +412,12 @@
 
                     const pricePreview = document.getElementById('bulk-price-preview');
                     const qtyInput = document.getElementById('purchase-qty');
-                    const currentQty = parseInt(qtyInput.value) || 1;
-                    const totalPrice = 3000 * currentQty;
-                    
-                    if (pricePreview) {
-                        pricePreview.innerHTML = `Stok: ${stock} · Total: Rp ${totalPrice.toLocaleString('id-ID')}`;
+                    if (qtyInput) {
+                        const currentQty = parseInt(qtyInput.value) || 1;
+                        const totalPrice = 3000 * currentQty;
+                        if (pricePreview) {
+                            pricePreview.innerHTML = `Stok: ${stock} · Total: Rp ${totalPrice.toLocaleString('id-ID')}`;
+                        }
                     }
                 }
             } catch (err) {
@@ -1817,14 +1827,19 @@ ryezennmotion.id — Instant Purchase Store`;
             const ctaBtn = document.querySelector('.btn-cta');
 
             if (appState.user) {
-                userEmailDisplay.textContent = appState.user.email;
-                userEmailDisplay.title = appState.user.email;
-                userNavWidget.style.display = 'flex';
-                userLoginBtnWrapper.style.display = 'none';
+                if (userEmailDisplay) {
+                    userEmailDisplay.textContent = appState.user.email;
+                    userEmailDisplay.title = appState.user.email;
+                }
+                if (userNavWidget) userNavWidget.style.display = 'flex';
+                if (userLoginBtnWrapper) userLoginBtnWrapper.style.display = 'none';
 
-                document.getElementById('user-profile-email').textContent = appState.user.email;
-                document.getElementById('user-profile-phone').textContent = appState.user.phone || '-';
-                document.getElementById('user-dashboard-welcome').textContent = `Selamat datang kembali, ${appState.user.email}`;
+                const profileEmailEl = document.getElementById('user-profile-email');
+                const profilePhoneEl = document.getElementById('user-profile-phone');
+                const welcomeEl = document.getElementById('user-dashboard-welcome');
+                if (profileEmailEl) profileEmailEl.textContent = appState.user.email;
+                if (profilePhoneEl) profilePhoneEl.textContent = appState.user.phone || '-';
+                if (welcomeEl) welcomeEl.textContent = `Selamat datang kembali, ${appState.user.email}`;
 
                 if (customerEmailInput) {
                     customerEmailInput.value = appState.user.email;
@@ -1840,8 +1855,8 @@ ryezennmotion.id — Instant Purchase Store`;
                     ctaBtn.innerHTML = 'Beli Sekarang <i class="ti ti-arrow-right"></i>';
                 }
             } else {
-                userNavWidget.style.display = 'none';
-                userLoginBtnWrapper.style.display = 'block';
+                if (userNavWidget) userNavWidget.style.display = 'none';
+                if (userLoginBtnWrapper) userLoginBtnWrapper.style.display = 'block';
 
                 if (customerEmailInput) {
                     customerEmailInput.value = '';

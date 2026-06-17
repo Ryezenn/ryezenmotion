@@ -13,6 +13,18 @@ const PORT = process.env.PORT || 5000;
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+// Device-aware Route Handler for Landing Page
+app.get('/', (req, res) => {
+  const ua = req.headers['user-agent'] || '';
+  const isMobile = /mobile|android|iphone|ipad|phone/i.test(ua);
+  
+  if (isMobile) {
+    res.sendFile(path.join(__dirname, 'public', 'mobile.html'));
+  } else {
+    res.sendFile(path.join(__dirname, 'public', 'desktop.html'));
+  }
+});
+
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Connection to MongoDB (non-blocking at startup)
@@ -919,9 +931,16 @@ app.get('/api/payment/check-status/:ref_no', requireUserAuth, async (req, res) =
   }
 });
 
-// Fallback: Serve public HTML on any routing fallback
+// Fallback: Serve public HTML on any routing fallback based on device detection
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  const ua = req.headers['user-agent'] || '';
+  const isMobile = /mobile|android|iphone|ipad|phone/i.test(ua);
+  
+  if (isMobile) {
+    res.sendFile(path.join(__dirname, 'public', 'mobile.html'));
+  } else {
+    res.sendFile(path.join(__dirname, 'public', 'desktop.html'));
+  }
 });
 
 // Export app for serverless deployments (like Vercel)
