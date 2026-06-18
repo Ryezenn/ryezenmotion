@@ -117,6 +117,16 @@
             }, 500);
         })();
 
+        function escapeHTML(str) {
+            if (!str) return '';
+            return String(str)
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
         // State variables
         let appState = {
             accounts: [],
@@ -716,25 +726,30 @@
                 : [{ gmail: data.gmail, link_akses: data.link_akses }];
                 
             const wrapper = document.getElementById('delivery-accounts-wrapper');
-            wrapper.innerHTML = accountsList.map((acc, index) => `
-                <div class="delivery-credentials-card" style="margin-top: 16px; text-align: left;">
-                    ${accountsList.length > 1 ? `<div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--color-primary); margin-bottom: 12px; border-bottom: 1px dashed rgba(17,24,39,0.08); padding-bottom: 6px;">AKUN #${index + 1}</div>` : ''}
-                    <div class="credential-item">
-                        <div class="credential-label">Gmail Akun</div>
-                        <div class="credential-value-wrapper">
-                            <span class="credential-val-text">${acc.gmail}</span>
-                            <button class="btn-credential-copy" onclick="copyValueToClipboard('${acc.gmail}', 'Gmail Akun #${index + 1}')"><i class="ti ti-copy"></i></button>
+            wrapper.innerHTML = accountsList.map((acc, index) => {
+                const escapedGmail = escapeHTML(acc.gmail);
+                const escapedLink = escapeHTML(acc.link_akses);
+                
+                return `
+                    <div class="delivery-credentials-card" style="margin-top: 16px; text-align: left;">
+                        ${accountsList.length > 1 ? `<div style="font-family: var(--font-mono); font-size: 11px; font-weight: 700; color: var(--color-primary); margin-bottom: 12px; border-bottom: 1px dashed rgba(17,24,39,0.08); padding-bottom: 6px;">AKUN #${index + 1}</div>` : ''}
+                        <div class="credential-item">
+                            <div class="credential-label">Gmail Akun</div>
+                            <div class="credential-value-wrapper">
+                                <span class="credential-val-text">${escapedGmail}</span>
+                                <button class="btn-credential-copy" onclick="copyValueToClipboard(decodeURIComponent('${encodeURIComponent(acc.gmail)}'), 'Gmail Akun #${index + 1}')"><i class="ti ti-copy"></i></button>
+                            </div>
+                        </div>
+                        <div class="credential-item" style="margin-top: 12px;">
+                            <div class="credential-label">Link Akses / Aktivasi</div>
+                            <div class="credential-value-wrapper">
+                                <span class="credential-val-text">${escapedLink}</span>
+                                <button class="btn-credential-copy" onclick="copyValueToClipboard(decodeURIComponent('${encodeURIComponent(acc.link_akses)}'), 'Link Akses #${index + 1}')"><i class="ti ti-copy"></i></button>
+                            </div>
                         </div>
                     </div>
-                    <div class="credential-item" style="margin-top: 12px;">
-                        <div class="credential-label">Link Akses / Aktivasi</div>
-                        <div class="credential-value-wrapper">
-                            <span class="credential-val-text">${acc.link_akses}</span>
-                            <button class="btn-credential-copy" onclick="copyValueToClipboard('${acc.link_akses}', 'Link Akses #${index + 1}')"><i class="ti ti-copy"></i></button>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
             
             document.getElementById('delivery-note').textContent = appState.settings.global_note;
             
@@ -745,8 +760,8 @@
                     <div class="tata-cara-mock-step">
                         <div class="step-circle">${idx + 1}</div>
                         <div>
-                            <h4 class="step-mock-title">${step.title}</h4>
-                            <p class="step-mock-desc">${step.description}</p>
+                            <h4 class="step-mock-title">${escapeHTML(step.title)}</h4>
+                            <p class="step-mock-desc">${escapeHTML(step.description)}</p>
                         </div>
                     </div>
                 `).join('');
@@ -865,10 +880,14 @@
                 const isTerpakaiSelected = acc.status === 'Terpakai' ? 'selected' : '';
                 const isPendingSelected = acc.status === 'Pending' ? 'selected' : '';
 
+                // Escape values for secure rendering
+                const escapedGmail = escapeHTML(acc.gmail);
+                const escapedLink = escapeHTML(acc.link_akses);
+
                 return `
                     <tr>
-                        <td class="account-gmail-cell">${acc.gmail}</td>
-                        <td class="account-link-cell" title="${acc.link_akses}">${acc.link_akses}</td>
+                        <td class="account-gmail-cell">${escapedGmail}</td>
+                        <td class="account-link-cell" title="${escapedLink}">${escapedLink}</td>
                         <td>
                             <select class="filter-select" style="padding: 4px 8px; font-size: 12px;" onchange="updateAccountStatus('${acc._id}', this.value)">
                                 <option value="Aktif" ${isAktifSelected}>Aktif</option>
@@ -878,7 +897,7 @@
                         </td>
                         <td>
                             <div class="actions-flex">
-                                <button class="btn-action-icon" title="Salin Link Akses" onclick="copyValueToClipboard('${acc.link_akses}', 'Link Akses')">
+                                <button class="btn-action-icon" title="Salin Link Akses" onclick="copyValueToClipboard(decodeURIComponent('${encodeURIComponent(acc.link_akses)}'), 'Link Akses')">
                                     <i class="ti ti-link"></i>
                                 </button>
                                 <button class="btn-action-icon" title="Salin Info Lengkap" onclick="copyFullAccountInfo('${acc._id}')">
@@ -1132,8 +1151,8 @@
                     <div class="tata-cara-mock-step">
                         <div class="step-circle">${idx + 1}</div>
                         <div>
-                            <h4 class="step-mock-title" style="font-family: var(--font-display);">${step.title}</h4>
-                            <p class="step-mock-desc" style="font-family: var(--font-mono);">${step.description}</p>
+                            <h4 class="step-mock-title" style="font-family: var(--font-display);">${escapeHTML(step.title)}</h4>
+                            <p class="step-mock-desc" style="font-family: var(--font-mono);">${escapeHTML(step.description)}</p>
                         </div>
                     </div>
                 `).join('');
@@ -1150,11 +1169,11 @@
                             <div class="step-editor-fields">
                                 <div class="form-group" style="margin-bottom:0;">
                                     <label class="form-label-mono">Judul Langkah #${idx + 1}</label>
-                                    <input type="text" class="form-input step-title-input" value="${step.title}" placeholder="Judul langkah" required>
+                                    <input type="text" class="form-input step-title-input" value="${escapeHTML(step.title)}" placeholder="Judul langkah" required>
                                 </div>
                                 <div class="form-group" style="margin-bottom:0;">
                                     <label class="form-label-mono">Keterangan / Deskripsi</label>
-                                    <input type="text" class="form-input step-desc-input" value="${step.description}" placeholder="Keterangan cara login" required>
+                                    <input type="text" class="form-input step-desc-input" value="${escapeHTML(step.description)}" placeholder="Keterangan cara login" required>
                                 </div>
                             </div>
                             <div class="step-editor-actions">
@@ -1459,6 +1478,9 @@ ryezennmotion.id — Instant Purchase Store`;
         }
 
         function makeHistoryAccountHtml(acc, index, showHeader) {
+            const escapedGmail = escapeHTML(acc.gmail);
+            const escapedLink = escapeHTML(acc.link_akses);
+
             return `
                 <div class="credential-card">
                     ${showHeader ? `<div class="credential-card-header">AKUN #${index + 1}</div>` : ''}
@@ -1466,16 +1488,16 @@ ryezennmotion.id — Instant Purchase Store`;
                         <div class="credential-field">
                             <div class="credential-field-label"><i class="ti ti-mail"></i> Gmail Akun</div>
                             <div class="credential-field-value-row">
-                                <span class="credential-value">${acc.gmail}</span>
-                                <button class="btn-credential-copy" onclick="copyValueToClipboard('${acc.gmail}', 'Gmail')" title="Salin Gmail"><i class="ti ti-copy"></i></button>
+                                <span class="credential-value">${escapedGmail}</span>
+                                <button class="btn-credential-copy" onclick="copyValueToClipboard(decodeURIComponent('${encodeURIComponent(acc.gmail)}'), 'Gmail')" title="Salin Gmail"><i class="ti ti-copy"></i></button>
                             </div>
                         </div>
                         
                         <div class="credential-field">
                             <div class="credential-field-label"><i class="ti ti-link"></i> Link Akses / Aktivasi</div>
                             <div class="credential-field-value-row">
-                                <span class="credential-value link-value" title="${acc.link_akses}">${acc.link_akses}</span>
-                                <button class="btn-credential-copy" onclick="copyValueToClipboard('${acc.link_akses}', 'Link Akses')" title="Salin Link"><i class="ti ti-copy"></i></button>
+                                <span class="credential-value link-value" title="${escapedLink}">${escapedLink}</span>
+                                <button class="btn-credential-copy" onclick="copyValueToClipboard(decodeURIComponent('${encodeURIComponent(acc.link_akses)}'), 'Link Akses')" title="Salin Link"><i class="ti ti-copy"></i></button>
                             </div>
                         </div>
                     </div>
