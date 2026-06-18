@@ -471,8 +471,8 @@
             const displayItems = appState.recentPurchases.slice(0, 3);
             listEl.innerHTML = displayItems.map(item => `
                 <div class="buyer-row">
-                    <span class="buyer-email">${item.email}</span>
-                    <span class="buyer-time">${item.time}</span>
+                    <span class="buyer-email">${escapeHTML(item.email)}</span>
+                    <span class="buyer-time">${escapeHTML(item.time)}</span>
                 </div>
             `).join('');
         }
@@ -843,8 +843,8 @@
 
                 return `
                     <tr>
-                        <td class="account-gmail-cell">${acc.gmail}</td>
-                        <td class="account-link-cell">${acc.link_akses}</td>
+                        <td class="account-gmail-cell">${escapeHTML(acc.gmail)}</td>
+                        <td class="account-link-cell">${escapeHTML(acc.link_akses)}</td>
                         <td>${statusPill}</td>
                         <td>
                             <button class="btn-action-icon" title="Lihat di Daftar" onclick="switchAdminSubpage('daftar-akun')">
@@ -1045,8 +1045,8 @@
                     
                     previewTbody.innerHTML = parsed.map(item => `
                         <tr>
-                            <td class="account-gmail-cell">${item.gmail}</td>
-                            <td class="account-link-cell" title="${item.link_akses}">${item.link_akses}</td>
+                            <td class="account-gmail-cell">${escapeHTML(item.gmail)}</td>
+                            <td class="account-link-cell" title="${escapeHTML(item.link_akses)}">${escapeHTML(item.link_akses)}</td>
                         </tr>
                     `).join('');
                     
@@ -1469,7 +1469,7 @@ ryezennmotion.id — Instant Purchase Store`;
                     <div class="buyer-row">
                         <span class="buyer-email" style="display: flex; align-items: center; gap: 6px;">
                             <i class="ti ti-crown" style="color: ${crownColor}; font-size: 14px;"></i>
-                            ${item.email}
+                            ${escapeHTML(item.email)}
                         </span>
                         <span class="buyer-time" style="font-weight: 700; color: var(--color-primary);">${item.count} Akun</span>
                     </div>
@@ -1622,8 +1622,8 @@ ryezennmotion.id — Instant Purchase Store`;
                     if (!acc.gmail) return '<span style="color:var(--color-text-muted); font-style:italic;">Belum dialokasikan</span>';
                     return `
                         <div style="margin-bottom: 6px; font-family: var(--font-mono); font-size:12px;">
-                            <strong>Gmail:</strong> ${acc.gmail}<br/>
-                            <span style="color:var(--color-text-muted); font-size:11px;">Link: ${acc.link_akses}</span>
+                            <strong>Gmail:</strong> ${escapeHTML(acc.gmail)}<br/>
+                            <span style="color:var(--color-text-muted); font-size:11px;">Link: ${escapeHTML(acc.link_akses)}</span>
                         </div>
                     `;
                 }).join('');
@@ -1635,8 +1635,8 @@ ryezennmotion.id — Instant Purchase Store`;
 
                 return `
                     <tr>
-                        <td style="font-family: var(--font-mono); font-weight: 700; color: var(--color-primary);">${tx.ref_no}</td>
-                        <td>${tx.email}</td>
+                        <td style="font-family: var(--font-mono); font-weight: 700; color: var(--color-primary);">${escapeHTML(tx.ref_no)}</td>
+                        <td>${escapeHTML(tx.email)}</td>
                         <td style="font-family: var(--font-mono); font-weight: 700;">${tx.quantity || 1} Akun</td>
                         <td style="font-family: var(--font-mono);">Rp ${(tx.amount || 0).toLocaleString('id-ID')}</td>
                         <td>${accountsHtml}</td>
@@ -1973,8 +1973,8 @@ ryezennmotion.id — Instant Purchase Store`;
 
                 return `
                     <tr>
-                        <td style="font-family: var(--font-mono); font-weight: 700;">${u.email}</td>
-                        <td style="font-family: var(--font-mono);">${u.phone || '-'}</td>
+                        <td style="font-family: var(--font-mono); font-weight: 700;">${escapeHTML(u.email)}</td>
+                        <td style="font-family: var(--font-mono);">${escapeHTML(u.phone || '-')}</td>
                         <td style="font-family: var(--font-mono); font-weight: 700; color: var(--color-primary);">${u.total_purchases || 0} Kali</td>
                         <td style="font-family: var(--font-mono); font-weight: 700;">${u.total_qty || 0} Akun</td>
                         <td>${dateText}</td>
