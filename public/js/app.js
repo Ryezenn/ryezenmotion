@@ -35,7 +35,7 @@
                 </div>
                 <h1 style="font-size: 28px; font-weight: 700; margin: 0 0 12px 0; color: #ffffff;">Akses Ditangguhkan</h1>
                 <p style="color: #9CA3AF; font-size: 16px; max-width: 450px; line-height: 1.6; margin: 0 0 24px 0;">
-                    Developer Tools terdeteksi aktif. Silakan <strong>menutup kembali Developer Tools (F12)</strong> Anda agar kamu bisa mengakses kembali website Ryezenn Motion.
+                    Developer Tools terdeteksi aktif. Silakan <strong>menutup kembali Developer Tools (F12)</strong> Anda agar kamu bisa mengakses kembali website Ryuzo Motion.
                 </p>
                 <div style="font-family: monospace; font-size: 12px; color: #FF5701; border: 1px dashed rgba(255, 87, 1, 0.3); padding: 8px 16px; border-radius: 4px; background: rgba(17, 24, 37, 0.5);">
                     STATUS: MENUNGGU PENUTUPAN DEVTOLS...
@@ -527,10 +527,10 @@
                     // Client-side Bypass: Hit API MustikaPayment secara langsung dari browser pembeli (residential IP)
                     const payload = new URLSearchParams();
                     payload.append("amount", resData.amount.toString());
-                    payload.append("product_name", `Ryezen Motion Premium 1 Tahun Qty ${resData.quantity}`);
+                    payload.append("product_name", `Ryuzo Motion Premium 1 Tahun Qty ${resData.quantity}`);
                     payload.append("customer_name", emailInput);
                     payload.append("expiry", "30");
-                    payload.append("redirect_url", "https://ryezennmotion.id");
+                    payload.append("redirect_url", "https://ryuzomotion.id");
 
                     const directRes = await fetch("https://mustikapayment.com/api/v1/create/qris", {
                         method: "POST",
@@ -1300,7 +1300,7 @@ ${note}
 Langkah Aktivasi:
 ${stepsText}
 -------------------------------------------
-ryezennmotion.id — Instant Purchase Store`;
+ryuzomotion.id — Instant Purchase Store`;
 
             copyValueToClipboard(fullText, "Informasi lengkap akun");
         }
@@ -1327,7 +1327,7 @@ ryezennmotion.id — Instant Purchase Store`;
             const encodedUri = encodeURI(csvContent);
             const link = document.createElement("a");
             link.setAttribute("href", encodedUri);
-            link.setAttribute("download", `daftar_akun_ryezennmotion_${Date.now()}.csv`);
+            link.setAttribute("download", `daftar_akun_ryuzomotion_${Date.now()}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);

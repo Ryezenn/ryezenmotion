@@ -1,6 +1,6 @@
-# Ryezenn Motion — Alight Motion Premium Store & Admin Dashboard
+# Ryuzo Motion — Alight Motion Premium Store & Admin Dashboard
 
-Ryezenn Motion adalah aplikasi web modern dan premium untuk penjualan akun Alight Motion Premium. Dilengkapi dengan sistem pembayaran otomatis QRIS via Mustika Payment, sistem manajemen stok akun, riwayat pembelian pelanggan, papan peringkat (leaderboard) pembelian, serta Dashboard Admin yang interaktif.
+Ryuzo Motion adalah aplikasi web modern dan premium untuk penjualan akun Alight Motion Premium. Dilengkapi dengan sistem pembayaran otomatis QRIS via Mustika Payment, sistem manajemen stok akun, riwayat pembelian pelanggan, papan peringkat (leaderboard) pembelian, serta Dashboard Admin yang interaktif.
 
 Proyek ini telah direfaktor untuk memisahkan kode markup (HTML), kode gaya (CSS), dan logika program (JavaScript/API Calls) secara modular untuk performa yang optimal dan kemudahan pemeliharaan.
 
@@ -9,7 +9,7 @@ Proyek ini telah direfaktor untuk memisahkan kode markup (HTML), kode gaya (CSS)
 ## 📁 Struktur Proyek (Modular)
 
 ```text
-ryezen-motion/
+ryuzo-motion/
 ├── public/                 # Folder publik yang disajikan oleh Express
 │   ├── css/
 │   │   └── style.css       # Seluruh styling, tema Obsidian Glow, responsivitas, & animasi
@@ -80,7 +80,7 @@ Aplikasi ini sudah dilengkapi dengan berkas `Dockerfile`.
 - Install Google Cloud CLI di komputer Anda.
 - Jalankan perintah berikut untuk melakukan build dan deploy langsung dari terminal lokal Anda:
   ```bash
-  gcloud run deploy ryezen-motion --source . --platform managed --allow-unauthenticated
+  gcloud run deploy ryuzo-motion --source . --platform managed --allow-unauthenticated
   ```
 - Masukkan environment variables (`MONGODB_URI`, `MUSTIKA_API_KEY`, `ADMIN_KEY`, `JWT_SECRET`) saat diminta di Google Cloud Console atau lewat argumen `--set-env-vars`.
 
@@ -96,7 +96,7 @@ Aplikasi ini sudah dilengkapi dengan berkas `Dockerfile`.
 - Buat berkas `.env` dan masukkan variabel konfigurasinya.
 - Jalankan aplikasi menggunakan PM2 agar berjalan di background selamanya:
   ```bash
-  pm2 start server.js --name "ryezen-motion"
+  pm2 start server.js --name "ryuzo-motion"
   ```
 - Untuk mengaktifkan auto-restart saat VPS reboot:
   ```bash

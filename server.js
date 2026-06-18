@@ -219,7 +219,7 @@ function verifyPassword(password, storedPassword) {
 function generateToken(payload) {
   const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64url');
   const stringifiedPayload = Buffer.from(JSON.stringify(payload)).toString('base64url');
-  const secret = process.env.JWT_SECRET || 'ryezensecretkey123';
+  const secret = process.env.JWT_SECRET || 'ryuzosecretkey123';
   const signature = crypto.createHmac('sha256', secret).update(`${header}.${stringifiedPayload}`).digest('base64url');
   return `${header}.${stringifiedPayload}.${signature}`;
 }
@@ -227,7 +227,7 @@ function generateToken(payload) {
 function verifyToken(token) {
   try {
     const [header, payload, signature] = token.split('.');
-    const secret = process.env.JWT_SECRET || 'ryezensecretkey123';
+    const secret = process.env.JWT_SECRET || 'ryuzosecretkey123';
     const verifySig = crypto.createHmac('sha256', secret).update(`${header}.${payload}`).digest('base64url');
     if (signature !== verifySig) return null;
     return JSON.parse(Buffer.from(payload, 'base64url').toString('utf8'));
@@ -253,7 +253,7 @@ const requireUserAuth = (req, res, next) => {
 
 // Middleware to authenticate admin requests using X-Admin-Key header
 const requireAdminAuth = (req, res, next) => {
-  const adminKey = process.env.ADMIN_KEY || 'ryezenadmin';
+  const adminKey = process.env.ADMIN_KEY || 'ryuzoadmin';
   const providedKey = req.headers['x-admin-key'];
   if (providedKey === adminKey) {
     next();
@@ -670,7 +670,7 @@ app.get('/api/admin/purchases', requireAdminAuth, async (req, res) => {
 // --- ADMIN AUTH API ---
 app.post('/api/admin/auth', (req, res) => {
   const { key } = req.body;
-  const adminKey = process.env.ADMIN_KEY || 'ryezenadmin';
+  const adminKey = process.env.ADMIN_KEY || 'ryuzoadmin';
   if (key === adminKey) {
     res.json({ success: true });
   } else {
@@ -721,10 +721,10 @@ app.post('/api/payment/create-qris', requireUserAuth, async (req, res) => {
     // Call Mustika Payment API
     const params = new URLSearchParams();
     params.append('amount', price.toString());
-    params.append('product_name', `Ryezen Motion Premium 1 Tahun Qty ${qty}`);
+    params.append('product_name', `Ryuzo Motion Premium 1 Tahun Qty ${qty}`);
     params.append('customer_name', email);
     params.append('expiry', expiryMins.toString());
-    params.append('redirect_url', 'https://ryezennmotion.id');
+    params.append('redirect_url', 'https://ryuzomotion.id');
 
     console.log(`Sending request to Mustika Payment for ${qty} account(s)...`);
     

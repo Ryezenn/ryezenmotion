@@ -1,7 +1,7 @@
 {
-  "name": "ryezennmotion-alight-premium",
+  "name": "ryuzomotion-alight-premium",
   "version": "1.0.0",
-  "description": "Ryezenn Motion Alight Motion Premium Toko & Admin Dashboard",
+  "description": "Ryuzo Motion Alight Motion Premium Toko & Admin Dashboard",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
