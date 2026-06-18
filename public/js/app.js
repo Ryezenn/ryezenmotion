@@ -109,14 +109,6 @@
                     devtoolsIsOpen = true;
                 }
 
-                // 2. Timing check using function constructor (standard debugger)
-                const start = performance.now();
-                (function() {}.constructor("debugger")());
-                const end = performance.now();
-                if (end - start > 100) {
-                    devtoolsIsOpen = true;
-                }
-
                 if (devtoolsIsOpen) {
                     showBlocker();
                 } else {
