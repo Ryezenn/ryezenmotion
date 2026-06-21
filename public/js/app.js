@@ -191,6 +191,16 @@
                 targetView.style.opacity = '1';
                 appState.activeView = viewName;
                 
+                // Show/hide floating WhatsApp contact button based on active view
+                const ownerWaBtn = document.getElementById('owner-wa-button');
+                if (ownerWaBtn) {
+                    if (viewName === 'admin') {
+                        ownerWaBtn.style.display = 'none';
+                    } else {
+                        ownerWaBtn.style.display = 'flex';
+                    }
+                }
+                
                 // Fetch fresh values when going to admin
                 if (viewName === 'admin') {
                     const passcode = sessionStorage.getItem('admin_passcode');
