@@ -5,6 +5,7 @@ const cors = require('cors');
 const axios = require('axios');
 const path = require('path');
 const { execFile } = require('child_process');
+const nodemailer = require('nodemailer');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -63,6 +64,7 @@ const Setting = mongoose.model('Setting', SettingSchema);
 
 const PurchaseSchema = new mongoose.Schema({
   email: { type: String, required: true },
+  whatsapp: { type: String, default: '' },
   ref_no: { type: String, required: true, unique: true },
   amount: { type: Number, required: true },
   quantity: { type: Number, default: 1 },
@@ -87,6 +89,105 @@ const UserSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model('User', UserSchema);
+
+// ================= EMAIL SENDER FUNCTION =================
+async function sendEmailWithCredentials(transaction) {
+  const host = process.env.SMTP_HOST;
+  const port = parseInt(process.env.SMTP_PORT) || 465;
+  const user = process.env.SMTP_USER;
+  const pass = process.env.SMTP_PASS;
+  const from = process.env.SMTP_FROM || `"Ryuzo Motion" <${user}>`;
+
+  if (!host || !user || !pass) {
+    console.warn('⚠️ SMTP settings not fully configured in environment variables. Email notification skipped.');
+    return;
+  }
+
+  // Create transporter
+  const transporter = nodemailer.createTransport({
+    host,
+    port,
+    secure: port === 465, // true for 465, false for other ports
+    auth: {
+      user,
+      pass
+    }
+  });
+
+  const accountsList = transaction.accounts_assigned && transaction.accounts_assigned.length > 0
+    ? transaction.accounts_assigned
+    : [{ gmail: transaction.gmail_assigned, link_akses: transaction.link_assigned }];
+
+  // Get global note and login steps from DB
+  let globalNote = '';
+  let loginSteps = [];
+  try {
+    const global_note_doc = await Setting.findOne({ key: 'global_note' });
+    if (global_note_doc) globalNote = global_note_doc.value;
+    const login_steps_doc = await Setting.findOne({ key: 'login_steps' });
+    if (login_steps_doc) loginSteps = login_steps_doc.value;
+  } catch (err) {
+    console.error('Error fetching settings for email:', err);
+  }
+
+  // Format accounts list HTML
+  const accountsHtml = accountsList.map((acc, index) => {
+    return `
+      <div style="background-color: #0d1423; border: 1px solid #ff5e00; border-radius: 12px; padding: 15px; margin-bottom: 12px; color: #ffffff;">
+        <h4 style="margin: 0 0 10px 0; color: #ff5e00; font-family: monospace;">AKUN #${index + 1}</h4>
+        <p style="margin: 5px 0;"><strong>Gmail:</strong> ${acc.gmail}</p>
+        <p style="margin: 5px 0;"><strong>Link Akses/Aktivasi:</strong> <a href="${acc.link_akses}" style="color: #ff5e00; text-decoration: underline;">${acc.link_akses}</a></p>
+      </div>
+    `;
+  }).join('');
+
+  // Format login steps HTML
+  const stepsHtml = loginSteps.map((step, idx) => {
+    return `
+      <div style="margin-bottom: 10px;">
+        <strong style="color: #ffffff;">Langkah ${idx + 1}: ${step.title}</strong>
+        <p style="margin: 3px 0 0 0; color: #9ca3af; font-size: 13px;">${step.description}</p>
+      </div>
+    `;
+  }).join('');
+
+  const mailOptions = {
+    from,
+    to: transaction.email,
+    subject: `Ryuzo Motion — Detail Akun Alight Motion Premium (${transaction.ref_no})`,
+    html: `
+      <div style="background-color: #050811; color: #f3f4f6; font-family: sans-serif; padding: 30px; border-radius: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #1a2333;">
+        <h2 style="color: #ffffff; text-align: center; border-bottom: 2px solid #ff5e00; padding-bottom: 15px; margin-top: 0;">Ryuzo Motion<span style="color:#ff5e00;">.</span></h2>
+        <p>Halo,</p>
+        <p>Terima kasih telah melakukan pembelian di <strong>Ryuzo Motion</strong>. Pembayaran Anda dengan Ref ID <strong>${transaction.ref_no}</strong> telah berhasil kami terima dan verifikasi.</p>
+        <p>Berikut adalah detail akun Alight Motion Premium Anda:</p>
+        
+        ${accountsHtml}
+        
+        <div style="background-color: rgba(255, 94, 0, 0.05); border: 1px solid rgba(255, 94, 0, 0.2); border-radius: 12px; padding: 15px; margin-top: 20px;">
+          <strong style="color: #ff5e00; display: block; margin-bottom: 5px;">Catatan Khusus:</strong>
+          <p style="margin: 0; font-size: 13px; color: #f3f4f6; line-height: 1.4;">${globalNote}</p>
+        </div>
+        
+        <div style="margin-top: 25px; border-top: 1px solid #1a2333; padding-top: 20px;">
+          <h3 style="color: #ffffff; margin-top: 0;">Tata Cara Login</h3>
+          ${stepsHtml}
+        </div>
+        
+        <p style="font-size: 11px; color: #9ca3af; text-align: center; margin-top: 30px; border-top: 1px solid #1a2333; padding-top: 15px;">
+          ryuzomotion.id &middot; Transaksi instan 24/7 otomatis
+        </p>
+      </div>
+    `
+  };
+
+  try {
+    const info = await transporter.sendMail(mailOptions);
+    console.log(`✉️ Email successfully sent to ${transaction.email}: ${info.messageId}`);
+  } catch (error) {
+    console.error(`❌ Gagal mengirim email ke ${transaction.email}:`, error);
+  }
+}
 
 // ================= DATA SEEDER =================
 async function seedData() {
@@ -526,99 +627,7 @@ app.get('/api/purchases/history', async (req, res) => {
   }
 });
 
-// --- CUSTOMER AUTHENTICATION APIs ---
 
-// Customer Registration
-app.post('/api/auth/register', async (req, res) => {
-  try {
-    const { email, password, phone } = req.body;
-    if (!email || !email.includes('@') || !password || password.length < 6) {
-      return res.status(400).json({ error: 'Format email tidak valid atau password kurang dari 6 karakter.' });
-    }
-
-    const emailNormalized = email.toLowerCase().trim();
-    const existingUser = await User.findOne({ email: emailNormalized });
-    if (existingUser) {
-      return res.status(400).json({ error: 'Email sudah terdaftar.' });
-    }
-
-    const hashedPassword = hashPassword(password);
-    const newUser = new User({
-      email: emailNormalized,
-      password: hashedPassword,
-      phone: phone || ''
-    });
-
-    await newUser.save();
-    
-    // Generate JWT token
-    const token = generateToken({ id: newUser._id, email: newUser.email });
-    res.json({
-      success: true,
-      token,
-      user: {
-        email: newUser.email,
-        phone: newUser.phone
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Customer Login
-app.post('/api/auth/login', async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res.status(400).json({ error: 'Email dan password wajib diisi.' });
-    }
-
-    const emailNormalized = email.toLowerCase().trim();
-    const user = await User.findOne({ email: emailNormalized });
-    if (!user || !verifyPassword(password, user.password)) {
-      return res.status(401).json({ error: 'Email atau password salah.' });
-    }
-
-    const token = generateToken({ id: user._id, email: user.email });
-    res.json({
-      success: true,
-      token,
-      user: {
-        email: user.email,
-        phone: user.phone
-      }
-    });
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Get Current User Profile
-app.get('/api/auth/me', requireUserAuth, async (req, res) => {
-  try {
-    const user = await User.findById(req.user.id).select('-password');
-    if (!user) {
-      return res.status(404).json({ error: 'User tidak ditemukan.' });
-    }
-    res.json(user);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
-
-// Get User Purchases history (unmasked credentials)
-app.get('/api/user/purchases', requireUserAuth, async (req, res) => {
-  try {
-    const history = await Purchase.find({
-      email: req.user.email,
-      status: 'Success'
-    }).sort({ timestamp: -1 });
-    res.json(history);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
 // --- ADMIN GET ALL USERS API ---
 app.get('/api/admin/users', requireAdminAuth, async (req, res) => {
@@ -681,10 +690,12 @@ app.post('/api/admin/auth', (req, res) => {
 // --- QRIS PAYMENT GATEWAY PROXY ---
 
 // Create QRIS Transaction
-app.post('/api/payment/create-qris', requireUserAuth, async (req, res) => {
+app.post('/api/payment/create-qris', async (req, res) => {
   try {
-    const email = req.user.email;
-    const { quantity, save_only, ref_no, qr_url, payment_link, amount } = req.body;
+    const { email, whatsapp, quantity, save_only, ref_no, qr_url, payment_link, amount } = req.body;
+    if (!email || !email.includes('@')) {
+      return res.status(400).json({ error: 'Email penerima wajib diisi dengan format yang benar.' });
+    }
 
     const qty = Math.max(1, parseInt(quantity) || 1);
 
@@ -702,6 +713,7 @@ app.post('/api/payment/create-qris', requireUserAuth, async (req, res) => {
       // Save pending transaction in database
       const newPurchase = new Purchase({
         email: email,
+        whatsapp: whatsapp || '',
         ref_no: ref_no,
         amount: amount || price,
         quantity: qty,
@@ -762,6 +774,7 @@ app.post('/api/payment/create-qris', requireUserAuth, async (req, res) => {
       // Save pending transaction in database
       const newPurchase = new Purchase({
         email: email,
+        whatsapp: whatsapp || '',
         ref_no: resRefNo,
         amount: resAmount,
         quantity: qty,
@@ -792,7 +805,7 @@ app.post('/api/payment/create-qris', requireUserAuth, async (req, res) => {
 });
 
 // Check Status of QRIS & Dispense Account on success
-app.get('/api/payment/check-status/:ref_no', requireUserAuth, async (req, res) => {
+app.get('/api/payment/check-status/:ref_no', async (req, res) => {
   try {
     const { ref_no } = req.params;
     const setSuccess = req.query.set_success === 'true';
@@ -801,11 +814,6 @@ app.get('/api/payment/check-status/:ref_no', requireUserAuth, async (req, res) =
     const transaction = await Purchase.findOne({ ref_no });
     if (!transaction) {
       return res.status(404).json({ error: 'Transaksi tidak ditemukan' });
-    }
-
-    // Ensure the transaction belongs to the logged-in user
-    if (transaction.email !== req.user.email) {
-      return res.status(403).json({ error: 'Akses ditolak. Transaksi ini milik pengguna lain.' });
     }
 
     // If already marked success in DB, return accounts list immediately
@@ -828,6 +836,7 @@ app.get('/api/payment/check-status/:ref_no', requireUserAuth, async (req, res) =
       if (accountsToDispense.length < qty) {
         transaction.status = 'Success';
         await transaction.save();
+        sendEmailWithCredentials(transaction);
         return res.json({
           status: 'success_out_of_stock',
           message: 'Pembayaran sukses, namun stok lisensi mendadak habis. Harap hubungi admin dengan mengirimkan bukti ref_no: ' + ref_no
@@ -853,6 +862,7 @@ app.get('/api/payment/check-status/:ref_no', requireUserAuth, async (req, res) =
         transaction.link_assigned = assigned[0].link_akses;
       }
       await transaction.save();
+      sendEmailWithCredentials(transaction);
 
       return res.json({
         status: 'success',
@@ -891,6 +901,7 @@ app.get('/api/payment/check-status/:ref_no', requireUserAuth, async (req, res) =
         // Fallback: If stock runs out in between, mark payment success but prompt user
         transaction.status = 'Success';
         await transaction.save();
+        sendEmailWithCredentials(transaction);
         return res.json({
           status: 'success_out_of_stock',
           message: 'Pembayaran sukses, namun stok lisensi mendadak habis. Harap hubungi admin dengan mengirimkan bukti ref_no: ' + ref_no
@@ -916,6 +927,7 @@ app.get('/api/payment/check-status/:ref_no', requireUserAuth, async (req, res) =
         transaction.link_assigned = assigned[0].link_akses;
       }
       await transaction.save();
+      sendEmailWithCredentials(transaction);
 
       res.json({
         status: 'success',

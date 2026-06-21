@@ -145,19 +145,11 @@
             activeQrisRef: null,
             activeQrisApiKey: null,
             tempParsedAccounts: [],
-            user: null,
-            userToken: localStorage.getItem('user_token') || null
+            lastPurchasedData: null
         };
 
         // Initialize App on window load
         window.addEventListener('DOMContentLoaded', () => {
-            // Check for customer user token
-            if (appState.userToken) {
-                fetchUserProfile();
-            } else {
-                updateUserNavWidget();
-            }
-
             fetchSettings();
             fetchPurchases();
             fetchTopBuyers();
@@ -173,9 +165,6 @@
                 }
                 if (appState.activeView === 'admin' && appState.activeAdminSubpage === 'users') {
                     fetchAdminUsers();
-                }
-                if (appState.activeView === 'user-dashboard') {
-                    fetchUserPurchases();
                 }
             }, 30000);
         });
@@ -217,18 +206,6 @@
                     fetchAccounts();
                     fetchSettings();
                     fetchAdminPurchases();
-                } else if (viewName === 'user-dashboard') {
-                    if (!appState.userToken) {
-                        showToast("Silakan login terlebih dahulu.", "warning");
-                        currentView.classList.add('active');
-                        targetView.classList.remove('active');
-                        currentView.style.opacity = '1';
-                        appState.activeView = 'landing';
-                        openUserAuthModal();
-                        return;
-                    }
-                    fetchUserProfile();
-                    fetchUserPurchases();
                 } else {
                     document.getElementById('view-success-delivery').classList.remove('active');
                 }
@@ -413,11 +390,7 @@
                     if (ctaBtn) {
                         if (stock > 0) {
                             ctaBtn.disabled = false;
-                            if (appState.user) {
-                                ctaBtn.innerHTML = 'Beli Sekarang <i class="ti ti-arrow-right"></i>';
-                            } else {
-                                ctaBtn.innerHTML = 'Login / Daftar untuk Membeli <i class="ti ti-lock"></i>';
-                            }
+                            ctaBtn.innerHTML = 'Beli Sekarang <i class="ti ti-arrow-right"></i>';
                         } else {
                             ctaBtn.disabled = true;
                             ctaBtn.innerHTML = 'Stok Habis';
@@ -482,13 +455,6 @@
         // -------------------------------------------------------------
         async function handleCheckout(e) {
             e.preventDefault();
-            
-            // Wajib login/register terlebih dahulu sebelum membeli
-            if (!appState.user) {
-                showToast("Silakan mendaftar atau masuk akun terlebih dahulu sebelum membeli!", "warning");
-                openUserAuthModal();
-                return;
-            }
 
             const emailInput = document.getElementById('customer-email').value;
             const phoneInput = document.getElementById('customer-phone').value;
@@ -507,11 +473,11 @@
                 const response = await fetch('/api/payment/create-qris', {
                     method: 'POST',
                     headers: { 
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${appState.userToken}`
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({ 
                         email: emailInput,
+                        whatsapp: phoneInput,
                         quantity: quantityInput
                     })
                 });
@@ -555,8 +521,7 @@
                     const saveRes = await fetch("/api/payment/create-qris", {
                         method: "POST",
                         headers: {
-                            "Content-Type": "application/json",
-                            "Authorization": `Bearer ${appState.userToken}`
+                            "Content-Type": "application/json"
                         },
                         body: JSON.stringify({
                             save_only: true,
@@ -564,6 +529,8 @@
                             qr_url: directResult.qr_url,
                             payment_link: directResult.payment_link,
                             amount: directResult.amount,
+                            email: emailInput,
+                            whatsapp: phoneInput,
                             quantity: quantityInput
                         })
                     });
@@ -647,11 +614,7 @@
                             const paymentStatus = directData.data?.status || directData.status;
                             if (paymentStatus === 'success' || paymentStatus === 'SUCCESS') {
                                 // Kirim sinyal sukses ke backend untuk mencairkan akun lisensi
-                                const updateRes = await fetch(`/api/payment/check-status/${refNo}?set_success=true`, {
-                                    headers: {
-                                        'Authorization': `Bearer ${appState.userToken}`
-                                    }
-                                });
+                                const updateRes = await fetch(`/api/payment/check-status/${refNo}?set_success=true`);
                                 const checkData = await updateRes.json();
                                 if (checkData.status === 'success') {
                                     paymentSuccess = true;
@@ -665,11 +628,7 @@
                         }
                     } else {
                         // Polling standar ke backend (Server-side)
-                        const response = await fetch(`/api/payment/check-status/${refNo}`, {
-                            headers: {
-                                'Authorization': `Bearer ${appState.userToken}`
-                            }
-                        });
+                        const response = await fetch(`/api/payment/check-status/${refNo}`);
                         const checkData = await response.json();
 
                         if (checkData.status === 'success') {
@@ -716,6 +675,9 @@
             if (window.qrisTimerInterval) clearInterval(window.qrisTimerInterval);
             
             closeModal('modal-payment');
+            
+            // Store data for download
+            appState.lastPurchasedData = data;
             
             // Hide landing and open success delivery panel
             document.getElementById('view-landing').classList.remove('active');
@@ -775,6 +737,56 @@
             // Refresh counts
             fetchAccounts();
             fetchPurchases();
+        }
+
+        function downloadAccountsTxt() {
+            if (!appState.lastPurchasedData) {
+                showToast("Tidak ada data akun yang siap diunduh.", "warning");
+                return;
+            }
+
+            const data = appState.lastPurchasedData;
+            const accountsList = data.accounts && data.accounts.length > 0 
+                ? data.accounts 
+                : [{ gmail: data.gmail, link_akses: data.link_akses }];
+            
+            const refNo = data.ref_no || appState.activeQrisRef || 'UNKNOWN';
+
+            let txtContent = `DETAIL AKUN ALIGHT MOTION PREMIUM Anda\n`;
+            txtContent += `===========================================\n`;
+            txtContent += `Reference ID : ${refNo}\n`;
+            txtContent += `Tanggal      : ${new Date().toLocaleString('id-ID')}\n\n`;
+
+            accountsList.forEach((acc, index) => {
+                txtContent += `AKUN #${index + 1}\n`;
+                txtContent += `Gmail      : ${acc.gmail}\n`;
+                txtContent += `Link Akses : ${acc.link_akses}\n`;
+                txtContent += `-------------------------------------------\n`;
+            });
+
+            if (appState.settings && appState.settings.global_note) {
+                txtContent += `Catatan Khusus:\n${appState.settings.global_note}\n\n`;
+            }
+
+            if (appState.settings && appState.settings.login_steps && appState.settings.login_steps.length > 0) {
+                txtContent += `Tata Cara Login:\n`;
+                appState.settings.login_steps.forEach((step, idx) => {
+                    txtContent += `${idx + 1}. ${step.title}\n   ${step.description}\n`;
+                });
+            }
+
+            txtContent += `===========================================\n`;
+            txtContent += `Terima kasih telah berbelanja di Ryuzo Motion!\n`;
+            txtContent += `ryuzomotion.id — Transaksi instan otomatis 24/7\n`;
+
+            const blob = new Blob([txtContent], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `RyuzoMotion_Akun_${refNo}.txt`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast("File akun berhasil diunduh!", "success");
         }
 
         // -------------------------------------------------------------
@@ -1646,283 +1658,7 @@ ryuzomotion.id — Instant Purchase Store`;
             }).join('');
         }
 
-        // -------------------------------------------------------------
-        // Customer Authentication (Login & Register) Functions
-        // -------------------------------------------------------------
-        function openUserAuthModal() {
-            document.getElementById('user-login-form').reset();
-            document.getElementById('user-register-form').reset();
-            switchUserAuthTab('login');
-            openModal('modal-user-auth');
-        }
 
-        function switchUserAuthTab(tab) {
-            const loginForm = document.getElementById('user-login-form');
-            const registerForm = document.getElementById('user-register-form');
-            const loginBtn = document.getElementById('user-tab-login-btn');
-            const registerBtn = document.getElementById('user-tab-register-btn');
-
-            if (tab === 'login') {
-                loginForm.style.display = 'block';
-                registerForm.style.display = 'none';
-                loginBtn.classList.add('active');
-                registerBtn.classList.remove('active');
-            } else {
-                loginForm.style.display = 'none';
-                registerForm.style.display = 'block';
-                loginBtn.classList.remove('active');
-                registerBtn.classList.add('active');
-            }
-        }
-
-        async function handleUserLoginSubmit(e) {
-            e.preventDefault();
-            const email = document.getElementById('login-email').value;
-            const password = document.getElementById('login-password').value;
-
-            try {
-                const response = await fetch('/api/auth/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, password })
-                });
-                const res = await response.json();
-
-                if (response.ok && res.success) {
-                    appState.userToken = res.token;
-                    appState.user = res.user;
-                    localStorage.setItem('user_token', res.token);
-                    
-                    showToast("Login berhasil!", "success");
-                    closeModal('modal-user-auth');
-                    updateUserNavWidget();
-                    
-                    if (appState.activeView === 'landing') {
-                        document.getElementById('customer-email').value = res.user.email;
-                        if (res.user.phone) {
-                            document.getElementById('customer-phone').value = res.user.phone;
-                        }
-                    }
-                } else {
-                    showToast(res.error || "Gagal masuk.", "danger");
-                }
-            } catch (err) {
-                console.error(err);
-                showToast("Koneksi gagal saat login.", "danger");
-            }
-        }
-
-        async function handleUserRegisterSubmit(e) {
-            e.preventDefault();
-            const email = document.getElementById('register-email').value;
-            const phone = document.getElementById('register-phone').value;
-            const password = document.getElementById('register-password').value;
-
-            try {
-                const response = await fetch('/api/auth/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ email, phone, password })
-                });
-                const res = await response.json();
-
-                if (response.ok && res.success) {
-                    appState.userToken = res.token;
-                    appState.user = res.user;
-                    localStorage.setItem('user_token', res.token);
-                    
-                    showToast("Registrasi berhasil!", "success");
-                    closeModal('modal-user-auth');
-                    updateUserNavWidget();
-                    
-                    if (appState.activeView === 'landing') {
-                        document.getElementById('customer-email').value = res.user.email;
-                        if (res.user.phone) {
-                            document.getElementById('customer-phone').value = res.user.phone;
-                        }
-                    }
-                } else {
-                    showToast(res.error || "Gagal mendaftar.", "danger");
-                }
-            } catch (err) {
-                console.error(err);
-                showToast("Koneksi gagal saat mendaftar.", "danger");
-            }
-        }
-
-        function handleUserLogout() {
-            appState.userToken = null;
-            appState.user = null;
-            localStorage.removeItem('user_token');
-            
-            showToast("Anda telah keluar akun.", "info");
-            updateUserNavWidget();
-            
-            if (appState.activeView === 'landing') {
-                document.getElementById('customer-email').value = '';
-                document.getElementById('customer-phone').value = '';
-            }
-
-            if (appState.activeView === 'user-dashboard') {
-                switchView('landing');
-            }
-        }
-
-        async function fetchUserProfile() {
-            if (!appState.userToken) return;
-
-            try {
-                const response = await fetch('/api/auth/me', {
-                    headers: { 'Authorization': `Bearer ${appState.userToken}` }
-                });
-                if (response.status === 401) {
-                    handleUserLogout();
-                    return;
-                }
-                const data = await response.json();
-                if (response.ok) {
-                    appState.user = data;
-                    updateUserNavWidget();
-                }
-            } catch (err) {
-                console.error("Error fetching user profile:", err);
-            }
-        }
-
-        async function fetchUserPurchases() {
-            if (!appState.userToken) return;
-
-            const listEl = document.getElementById('user-dashboard-history-list');
-            if (!listEl) return;
-
-            try {
-                const response = await fetch('/api/user/purchases', {
-                    headers: { 'Authorization': `Bearer ${appState.userToken}` }
-                });
-                
-                if (response.status === 401) {
-                    handleUserLogout();
-                    return;
-                }
-
-                const list = await response.json();
-                if (response.ok) {
-                    renderUserPurchases(list);
-                }
-            } catch (err) {
-                console.error("Error fetching user purchases:", err);
-                listEl.innerHTML = `<div style="text-align: center; color: var(--color-danger); font-family: var(--font-mono); font-size: 12px; padding: 24px 0;">Gagal memuat riwayat.</div>`;
-            }
-        }
-
-        function renderUserPurchases(list) {
-            const listEl = document.getElementById('user-dashboard-history-list');
-            if (!listEl) return;
-
-            // Update profile membership pass statistics dynamically
-            const txCountEl = document.getElementById('user-stat-tx');
-            const qtyCountEl = document.getElementById('user-stat-qty');
-            if (txCountEl) txCountEl.textContent = list.length;
-            if (qtyCountEl) {
-                const totalQty = list.reduce((sum, tx) => sum + (tx.quantity || 1), 0);
-                qtyCountEl.textContent = totalQty;
-            }
-
-            if (list.length === 0) {
-                listEl.innerHTML = `
-                    <div class="empty-history-box">
-                        <i class="ti ti-info-circle"></i>
-                        Belum ada pembelian lisensi terdaftar.
-                    </div>
-                `;
-                return;
-            }
-
-            listEl.innerHTML = list.map(tx => {
-                const accountsList = tx.accounts_assigned && tx.accounts_assigned.length > 0 
-                    ? tx.accounts_assigned 
-                    : [{ gmail: tx.gmail_assigned, link_akses: tx.link_assigned }];
-                
-                const dateText = new Date(tx.timestamp).toLocaleDateString('id-ID', {
-                    day: 'numeric',
-                    month: 'short',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
-
-                const accountsHtml = accountsList.map((acc, index) => 
-                    makeHistoryAccountHtml(acc, index, accountsList.length > 1)
-                ).join('');
-
-                return `
-                    <div class="license-ticket-item">
-                        <div class="ticket-header">
-                            <span class="ticket-ref"><i class="ti ti-ticket"></i> ${tx.ref_no}</span>
-                            <span class="ticket-date">${dateText} (Qty: ${tx.quantity || 1})</span>
-                        </div>
-                        ${accountsHtml}
-                    </div>
-                `;
-            }).join('');
-        }
-
-        function updateUserNavWidget() {
-            const userNavWidget = document.getElementById('user-nav-widget');
-            const userLoginBtnWrapper = document.getElementById('user-login-btn-wrapper');
-            const userEmailDisplay = document.getElementById('user-email-display');
-            
-            const customerEmailInput = document.getElementById('customer-email');
-            const customerPhoneInput = document.getElementById('customer-phone');
-            const ctaBtn = document.querySelector('.btn-cta');
-
-            if (appState.user) {
-                if (userEmailDisplay) {
-                    userEmailDisplay.textContent = appState.user.email;
-                    userEmailDisplay.title = appState.user.email;
-                }
-                if (userNavWidget) userNavWidget.style.display = 'flex';
-                if (userLoginBtnWrapper) userLoginBtnWrapper.style.display = 'none';
-
-                const profileEmailEl = document.getElementById('user-profile-email');
-                const profilePhoneEl = document.getElementById('user-profile-phone');
-                const welcomeEl = document.getElementById('user-dashboard-welcome');
-                if (profileEmailEl) profileEmailEl.textContent = appState.user.email;
-                if (profilePhoneEl) profilePhoneEl.textContent = appState.user.phone || '-';
-                if (welcomeEl) welcomeEl.textContent = `Selamat datang kembali, ${appState.user.email}`;
-
-                if (customerEmailInput) {
-                    customerEmailInput.value = appState.user.email;
-                    customerEmailInput.readOnly = true;
-                    customerEmailInput.style.backgroundColor = 'rgba(17,24,39,0.02)';
-                }
-                if (customerPhoneInput && appState.user.phone) {
-                    customerPhoneInput.value = appState.user.phone;
-                    customerPhoneInput.readOnly = true;
-                    customerPhoneInput.style.backgroundColor = 'rgba(17,24,39,0.02)';
-                }
-                if (ctaBtn && appState.stockCount > 0) {
-                    ctaBtn.innerHTML = 'Beli Sekarang <i class="ti ti-arrow-right"></i>';
-                }
-            } else {
-                if (userNavWidget) userNavWidget.style.display = 'none';
-                if (userLoginBtnWrapper) userLoginBtnWrapper.style.display = 'block';
-
-                if (customerEmailInput) {
-                    customerEmailInput.value = '';
-                    customerEmailInput.readOnly = false;
-                    customerEmailInput.style.backgroundColor = 'var(--color-bg-light)';
-                }
-                if (customerPhoneInput) {
-                    customerPhoneInput.value = '';
-                    customerPhoneInput.readOnly = false;
-                    customerPhoneInput.style.backgroundColor = 'var(--color-bg-light)';
-                }
-                if (ctaBtn && appState.stockCount > 0) {
-                    ctaBtn.innerHTML = 'Login / Daftar untuk Membeli <i class="ti ti-lock"></i>';
-                }
-            }
-        }
 
         // -------------------------------------------------------------
         // Admin Users Panel API & Renders

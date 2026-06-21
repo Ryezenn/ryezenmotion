@@ -686,16 +686,6 @@
             <nav class="landing-nav">
                 <a href="#" class="landing-logo" onclick="event.preventDefault(); resetToLandingPage()">Ryuzo Motion<span class="logo-dot">.</span><span class="online-indicator-dot" title="Sistem Online"></span></a>
                 <div class="nav-right-container">
-                    <!-- User logged in widget -->
-                    <div id="user-nav-widget" class="user-nav-widget-container" style="display: none; align-items: center; gap: 8px;">
-                        <span id="user-email-display" class="user-nav-email" style="display: none !important;">user@gmail.com</span>
-                        <a onclick="switchView('user-dashboard')" class="btn-user-nav btn-user-dashboard" title="Dashboard"><i class="ti ti-user-circle"></i></a>
-                        <a onclick="handleUserLogout()" class="btn-user-nav btn-user-logout" title="Keluar"><i class="ti ti-logout"></i></a>
-                    </div>
-                    <!-- User logged out widget -->
-                    <div id="user-login-btn-wrapper">
-                        <button type="button" class="btn-mono-compact" onclick="openUserAuthModal()"><i class="ti ti-user"></i></button>
-                    </div>
                 </div>
             </nav>
 
@@ -753,18 +743,8 @@
                 <!-- Right Column (Checkout & Lookup Card + Stats) -->
                 <div class="landing-checkout-col">
                     <div class="checkout-container-card">
-                        <!-- Tabs Navigation -->
-                        <div class="card-tabs">
-                            <button type="button" class="card-tab-btn active" onclick="switchCardTab('beli', this)">
-                                <i class="ti ti-shopping-cart"></i> Beli Akun
-                            </button>
-                            <button type="button" class="card-tab-btn" onclick="switchCardTab('riwayat', this)">
-                                <i class="ti ti-search"></i> Cek Riwayat
-                            </button>
-                        </div>
-
-                        <!-- TAB 1: Beli Akun -->
-                        <div id="card-tab-beli" class="card-tab-pane active">
+                        <!-- Beli Akun Form -->
+                        <div id="card-tab-beli" class="card-tab-pane active" style="padding: 0;">
                             <form id="landing-checkout-form" class="checkout-form" onsubmit="handleCheckout(event)">
                                 <div class="input-group-premium">
                                     <label>Email Penerima *</label>
@@ -819,26 +799,6 @@
                             </div>
                         </div>
 
-                        <!-- TAB 2: Cek Riwayat -->
-                        <div id="card-tab-riwayat" class="card-tab-pane">
-                            <p style="font-size: 12px; color: var(--color-text-muted); margin-bottom: 16px; line-height: 1.4;">
-                                Masukkan alamat email atau Reference ID (Ref ID) pesanan Anda di bawah untuk mengambil kredensial lisensi Anda kembali secara instan.
-                            </p>
-                            <div class="input-group-premium" style="margin-bottom: 16px;">
-                                <label>Email Pembeli / Ref ID</label>
-                                <div class="input-wrapper">
-                                    <input type="text" id="history-search-input" class="form-input-premium" placeholder="contoh@gmail.com atau Ref ID">
-                                    <i class="ti ti-search"></i>
-                                </div>
-                            </div>
-                            <button type="button" onclick="lookupPurchaseHistory()" class="btn-cta" style="height: 46px; background: rgba(255, 94, 0, 0.08); color: var(--color-primary); border: 1px solid rgba(255, 94, 0, 0.25); box-shadow: none;">
-                                Cari Transaksi <i class="ti ti-search" style="background: none; width: auto; height: auto;"></i>
-                            </button>
-                            
-                            <div id="history-results-wrapper" style="display: none; margin-top: 20px; border-top: 1px dashed rgba(255, 255, 255, 0.1); padding-top: 16px; max-height: 350px; overflow-y: auto;">
-                                <!-- Result items will be generated here -->
-                            </div>
-                        </div>
                     </div>
 
                     <!-- Statistics & Social Proof Row -->
@@ -908,130 +868,18 @@
             </div>
         </div>
 
-        <button class="btn-cta" onclick="resetToLandingPage()" style="margin-top: 32px; background-color: var(--color-primary);">
-            <i class="ti ti-arrow-left" style="background: none; width: auto; height: auto;"></i> Kembali ke Toko
-        </button>
-    </div>
-
-
-    <!-- ================================================================= -->
-    <!-- VIEW 3 — Customer Dashboard                                       -->
-    <!-- ================================================================= -->
-    <div id="view-user-dashboard" class="app-view">
-        <div class="landing-container">
-            <!-- Nav -->
-            <nav class="landing-nav">
-                <a href="#" class="landing-logo" onclick="event.preventDefault(); resetToLandingPage()">Ryuzo Motion<span class="logo-dot">.</span><span class="online-indicator-dot" title="Sistem Online"></span></a>
-                <button type="button" class="btn-mono-compact" onclick="resetToLandingPage()"><i class="ti ti-shopping-cart"></i></button>
-            </nav>
-
-            <header class="hero-section" style="margin-bottom: 24px;">
-                <h1 class="hero-title dashboard-hero-title" style="font-size: 32px;">Profil & Dashboard Saya</h1>
-                <p style="font-size: 13px; color: var(--color-text-muted);" id="user-dashboard-welcome">Memuat profil...</p>
-            </header>
-
-            <div class="divider" style="margin-bottom: 24px;"></div>
-
-            <!-- Profile Membership Pass (Modern & Custom) -->
-            <div class="profile-membership-pass">
-                <div class="pass-glow-overlay"></div>
-                <div class="pass-header">
-                    <div class="pass-avatar-wrapper">
-                        <div class="pass-avatar">
-                            <i class="ti ti-user-circle"></i>
-                            <span class="pass-status-badge">PRO</span>
-                        </div>
-                        <div class="pass-title-group">
-                            <h3 class="pass-user-title">Premium Member</h3>
-                            <span class="pass-user-status"><i class="ti ti-crown"></i> VIP Account</span>
-                        </div>
-                    </div>
-                    <div class="pass-chip"></div>
-                </div>
-                <div class="pass-body">
-                    <div class="pass-info-grid">
-                        <div class="pass-info-item">
-                            <label><i class="ti ti-mail"></i> EMAIL MEMBER</label>
-                            <span id="user-profile-email">-</span>
-                        </div>
-                        <div class="pass-info-item">
-                            <label><i class="ti ti-brand-whatsapp"></i> KONTAK WHATSAPP</label>
-                            <span id="user-profile-phone">-</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Decorative Barcode -->
-                    <div class="pass-barcode">
-                        <span class="barcode-line thin"></span>
-                        <span class="barcode-line thick"></span>
-                        <span class="barcode-line"></span>
-                        <span class="barcode-line thin"></span>
-                        <span class="barcode-line wide"></span>
-                        <span class="barcode-line thick"></span>
-                        <span class="barcode-line"></span>
-                        <span class="barcode-line thin"></span>
-                        <span class="barcode-line thick"></span>
-                        <span class="barcode-line"></span>
-                        <span class="barcode-line wide"></span>
-                        <span class="barcode-line thin"></span>
-                        <span class="barcode-line thick"></span>
-                        <span class="barcode-line"></span>
-                        <span class="barcode-line thin"></span>
-                        <span class="barcode-line wide"></span>
-                        <span class="barcode-line thick"></span>
-                        <span class="barcode-line"></span>
-                        <span class="barcode-line thin"></span>
-                        <span class="barcode-line thick"></span>
-                        <span class="barcode-line"></span>
-                        <span class="barcode-line wide"></span>
-                        <span class="barcode-line thin"></span>
-                    </div>
-
-                    <div class="pass-stats-row">
-                        <div class="pass-stat-item">
-                            <span class="pass-stat-val" id="user-stat-tx">0</span>
-                            <label>Transaksi</label>
-                        </div>
-                        <div class="pass-stat-item">
-                            <span class="pass-stat-val" id="user-stat-qty">0</span>
-                            <label>Total Lisensi</label>
-                        </div>
-                        <div class="pass-stat-item">
-                            <span class="pass-stat-val status-active"><i class="ti ti-circle-filled"></i> Aktif</span>
-                            <label>Status</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="pass-actions">
-                    <button type="button" class="btn-pass-action btn-pass-shop" onclick="resetToLandingPage()">
-                        <i class="ti ti-shopping-cart"></i> Belanja Lagi
-                    </button>
-                    <button type="button" class="btn-pass-action btn-pass-logout" onclick="handleUserLogout()">
-                        <i class="ti ti-logout"></i> Keluar Sesi
-                    </button>
-                </div>
-            </div>
-
-            <!-- Purchase History List -->
-            <h3 style="font-family: var(--font-display); font-size: 18px; font-weight: 700; text-align: left; margin-bottom: 14px; display: flex; align-items: center; gap: 8px;">
-                <i class="ti ti-history" style="color: var(--color-primary); font-size: 20px;"></i> Riwayat Lisensi Anda
-            </h3>
-            
-            <div id="user-dashboard-history-list">
-                <!-- Dynamically loaded credentials -->
-                <div style="text-align: center; padding: 24px 0; color: var(--color-text-muted); font-family: var(--font-mono); font-size: 12px;">
-                    Memuat riwayat lisensi...
-                </div>
-            </div>
-
-            <div class="divider" style="margin-top: 32px; margin-bottom: 24px;"></div>
-
-            <!-- Footer -->
-            <footer class="landing-footer" style="margin-top: 0;">
-                <span>ryuzomotion.id · Transaksi terenkripsi · Dukungan 24/7</span>
-            </footer>
+        <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 32px;">
+            <button class="btn-cta" id="btn-download-txt" onclick="downloadAccountsTxt()" style="background-color: #10B981; border: none; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);">
+                <i class="ti ti-download" style="background: none; width: auto; height: auto;"></i> Download Akun (.txt)
+            </button>
+            <button class="btn-cta" onclick="resetToLandingPage()" style="margin-top: 0; background-color: var(--color-primary);">
+                <i class="ti ti-arrow-left" style="background: none; width: auto; height: auto;"></i> Kembali ke Toko
+            </button>
         </div>
     </div>
+
+
+
 
 
     <!-- ================================================================= -->
@@ -1412,57 +1260,7 @@ contoh2@gmail.com,https://alight.link/b
     </div>
 
 
-    <!-- ================================================================= -->
-    <!-- CUSTOMER AUTHENTICATION MODAL (LOGIN & REGISTER)                 -->
-    <!-- ================================================================= -->
-    <div id="modal-user-auth" class="modal-overlay">
-        <div class="modal-card">
-            <button class="modal-close" onclick="closeModal('modal-user-auth')"><i class="ti ti-x"></i></button>
-            <div class="modal-header-icon" style="background-color: var(--color-primary-light); color: var(--color-primary);">
-                <i class="ti ti-user"></i>
-            </div>
-            
-            <!-- Auth Tab Header -->
-            <div class="tabs-header" style="justify-content: center; margin-bottom: 20px; border-bottom: var(--color-border-hairline);">
-                <button type="button" class="tab-btn active" id="user-tab-login-btn" onclick="switchUserAuthTab('login')">Masuk</button>
-                <button type="button" class="tab-btn" id="user-tab-register-btn" onclick="switchUserAuthTab('register')">Daftar Akun</button>
-            </div>
 
-            <!-- Login Form -->
-            <form id="user-login-form" onsubmit="handleUserLoginSubmit(event)">
-                <div class="form-group">
-                    <label class="form-label-mono">Email</label>
-                    <input type="email" id="login-email" class="form-input" placeholder="contoh@gmail.com" required>
-                </div>
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label class="form-label-mono">Password</label>
-                    <input type="password" id="login-password" class="form-input" placeholder="••••••••" required>
-                </div>
-                <button type="submit" class="modal-action-btn btn-modal-dark">
-                    Masuk
-                </button>
-            </form>
-
-            <!-- Register Form -->
-            <form id="user-register-form" onsubmit="handleUserRegisterSubmit(event)" style="display: none;">
-                <div class="form-group">
-                    <label class="form-label-mono">Email</label>
-                    <input type="email" id="register-email" class="form-input" placeholder="contoh@gmail.com" required>
-                </div>
-                <div class="form-group">
-                    <label class="form-label-mono">Nomor WhatsApp</label>
-                    <input type="tel" id="register-phone" class="form-input" placeholder="08xxxxxxxxx" required>
-                </div>
-                <div class="form-group" style="margin-bottom: 20px;">
-                    <label class="form-label-mono">Password (Min. 6 Karakter)</label>
-                    <input type="password" id="register-password" class="form-input" placeholder="••••••••" required minlength="6">
-                </div>
-                <button type="submit" class="modal-action-btn btn-modal-dark">
-                    Daftar Akun
-                </button>
-            </form>
-        </div>
-    </div>
 
 
     <!-- ================================================================= -->
