@@ -193,14 +193,17 @@ async function sendEmailWithCredentials(transaction) {
 async function seedData() {
   try {
     // 1. Seed Accounts if empty
+    // Clean up old seeded accounts to avoid email collisions or duplicates
+    await Account.deleteMany({ gmail: { $in: ["rehan.premium1@gmail.com", "fathir.alight@gmail.com", "motion.pro99@gmail.com", "glowing.edit@gmail.com", "cc.alightx@gmail.com"] } });
+
     const accountCount = await Account.countDocuments();
     if (accountCount === 0) {
       const initialAccounts = [
-        { gmail: "rehan.premium1@gmail.com", password: "password1234", link_akses: "https://alight.link/activation1", status: "Aktif", catatan_khusus: "Durasi 1 Tahun" },
-        { gmail: "fathir.alight@gmail.com", password: "fathir2026", link_akses: "https://alight.link/activation2", status: "Terpakai", catatan_khusus: "Buyer: fathir@gmail.com" },
-        { gmail: "motion.pro99@gmail.com", password: "proalight99", link_akses: "https://alight.link/activation3", status: "Aktif", catatan_khusus: "Durasi 1 Bulan" },
-        { gmail: "glowing.edit@gmail.com", password: "glowedit00", link_akses: "https://alight.link/activation4", status: "Pending", catatan_khusus: "Menunggu Transfer" },
-        { gmail: "cc.alightx@gmail.com", password: "ccalightx", link_akses: "https://alight.link/activation5", status: "Terpakai", catatan_khusus: "Buyer: cc@gmail.com" }
+        { gmail: "ryuzo.premium001@gmail.com", password: "password1234", link_akses: "https://alight.link/activation1", status: "Aktif", catatan_khusus: "Durasi 1 Tahun" },
+        { gmail: "ryuzo.premium002@gmail.com", password: "fathir2026", link_akses: "https://alight.link/activation2", status: "Terpakai", catatan_khusus: "Buyer: customer.fathir@gmail.com" },
+        { gmail: "ryuzo.premium003@gmail.com", password: "proalight99", link_akses: "https://alight.link/activation3", status: "Aktif", catatan_khusus: "Durasi 1 Bulan" },
+        { gmail: "ryuzo.premium004@gmail.com", password: "glowedit00", link_akses: "https://alight.link/activation4", status: "Pending", catatan_khusus: "Menunggu Transfer" },
+        { gmail: "ryuzo.premium005@gmail.com", password: "ccalightx", link_akses: "https://alight.link/activation5", status: "Terpakai", catatan_khusus: "Buyer: customer.cc@gmail.com" }
       ];
       await Account.insertMany(initialAccounts);
       console.log('Seeded default Accounts data');
@@ -230,60 +233,61 @@ async function seedData() {
     }
 
     // 3. Seed Purchases if empty (for the "10 Pembelian Terakhir" visual)
-    // Clear legacy masked seeds if present
+    // Clear legacy seeded purchases to ensure new distinct emails are seeded correctly
+    await Purchase.deleteMany({ ref_no: { $in: ["QR100001", "QR100002", "QR100003", "QR100004", "QR100005"] } });
     await Purchase.deleteMany({ email: { $in: ["reha****@gmail.com", "fath****@gmail.com", "santi****@gmail.com", "dani****@gmail.com", "andi****@gmail.com"] } });
     
     const seededPurchasesCount = await Purchase.countDocuments({ ref_no: { $in: ["QR100001", "QR100002", "QR100003", "QR100004", "QR100005"] } });
     if (seededPurchasesCount === 0) {
       const initialPurchases = [
         { 
-          email: "rehan.premium1@gmail.com", 
+          email: "customer.rehan@gmail.com", 
           ref_no: "QR100001", 
           amount: 3000, 
           status: "Success", 
-          gmail_assigned: "rehan.premium1@gmail.com", 
+          gmail_assigned: "ryuzo.premium001@gmail.com", 
           link_assigned: "https://alight.link/activation1",
-          accounts_assigned: [{ gmail: "rehan.premium1@gmail.com", link_akses: "https://alight.link/activation1" }],
+          accounts_assigned: [{ gmail: "ryuzo.premium001@gmail.com", link_akses: "https://alight.link/activation1" }],
           timestamp: new Date(Date.now() - 30 * 1000) 
         },
         { 
-          email: "fathir.alight@gmail.com", 
+          email: "customer.fathir@gmail.com", 
           ref_no: "QR100002", 
           amount: 3000, 
           status: "Success", 
-          gmail_assigned: "fathir.alight@gmail.com", 
+          gmail_assigned: "ryuzo.premium002@gmail.com", 
           link_assigned: "https://alight.link/activation2",
-          accounts_assigned: [{ gmail: "fathir.alight@gmail.com", link_akses: "https://alight.link/activation2" }],
+          accounts_assigned: [{ gmail: "ryuzo.premium002@gmail.com", link_akses: "https://alight.link/activation2" }],
           timestamp: new Date(Date.now() - 180 * 1000) 
         },
         { 
-          email: "motion.pro99@gmail.com", 
+          email: "customer.motion@gmail.com", 
           ref_no: "QR100003", 
           amount: 3000, 
           status: "Success", 
-          gmail_assigned: "motion.pro99@gmail.com", 
+          gmail_assigned: "ryuzo.premium003@gmail.com", 
           link_assigned: "https://alight.link/activation3",
-          accounts_assigned: [{ gmail: "motion.pro99@gmail.com", link_akses: "https://alight.link/activation3" }],
+          accounts_assigned: [{ gmail: "ryuzo.premium003@gmail.com", link_akses: "https://alight.link/activation3" }],
           timestamp: new Date(Date.now() - 420 * 1000) 
         },
         { 
-          email: "glowing.edit@gmail.com", 
+          email: "customer.glowing@gmail.com", 
           ref_no: "QR100004", 
           amount: 3000, 
           status: "Success", 
-          gmail_assigned: "glowing.edit@gmail.com", 
+          gmail_assigned: "ryuzo.premium004@gmail.com", 
           link_assigned: "https://alight.link/activation4",
-          accounts_assigned: [{ gmail: "glowing.edit@gmail.com", link_akses: "https://alight.link/activation4" }],
+          accounts_assigned: [{ gmail: "ryuzo.premium004@gmail.com", link_akses: "https://alight.link/activation4" }],
           timestamp: new Date(Date.now() - 720 * 1000) 
         },
         { 
-          email: "cc.alightx@gmail.com", 
+          email: "customer.cc@gmail.com", 
           ref_no: "QR100005", 
           amount: 3000, 
           status: "Success", 
-          gmail_assigned: "cc.alightx@gmail.com", 
+          gmail_assigned: "ryuzo.premium005@gmail.com", 
           link_assigned: "https://alight.link/activation5",
-          accounts_assigned: [{ gmail: "cc.alightx@gmail.com", link_akses: "https://alight.link/activation5" }],
+          accounts_assigned: [{ gmail: "ryuzo.premium005@gmail.com", link_akses: "https://alight.link/activation5" }],
           timestamp: new Date(Date.now() - 1080 * 1000) 
         }
       ];
