@@ -96,11 +96,15 @@ async function sendEmailWithCredentials(transaction) {
   const port = parseInt(process.env.SMTP_PORT) || 465;
   const user = process.env.SMTP_USER;
   const pass = process.env.SMTP_PASS;
-  const from = process.env.SMTP_FROM || `"Ryuzo Motion" <${user}>`;
-
+  
   if (!host || !user || !pass) {
-    console.warn('⚠️ SMTP settings not fully configured in environment variables. Email notification skipped.');
+    console.error("❌ Gagal mengirim email: Konfigurasi SMTP (.env / Environment Variables) belum diatur atau tidak lengkap. Pastikan SMTP_HOST, SMTP_PORT, SMTP_USER, dan SMTP_PASS telah dikonfigurasi.");
     return;
+  }
+
+  let from = process.env.SMTP_FROM || `"Ryuzo Motion" <${user}>`;
+  if (from && !from.includes('<') && !from.includes('@')) {
+    from = `"${from.replace(/"/g, '')}" <${user}>`;
   }
 
   // Create transporter
