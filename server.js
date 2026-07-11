@@ -137,10 +137,29 @@ async function sendEmailWithCredentials(transaction) {
   // Format accounts list HTML
   const accountsHtml = accountsList.map((acc, index) => {
     return `
-      <div style="background-color: #0d1423; border: 1px solid #ff5e00; border-radius: 12px; padding: 15px; margin-bottom: 12px; color: #ffffff;">
-        <h4 style="margin: 0 0 10px 0; color: #ff5e00; font-family: monospace;">AKUN #${index + 1}</h4>
-        <p style="margin: 5px 0;"><strong>Gmail:</strong> ${acc.gmail}</p>
-        <p style="margin: 5px 0;"><strong>Link Akses/Aktivasi:</strong> <a href="${acc.link_akses}" style="color: #ff5e00; text-decoration: underline;">${acc.link_akses}</a></p>
+      <div style="background: linear-gradient(135deg, #090e1a, #0b1426); border: 1px solid rgba(255, 94, 0, 0.3); border-radius: 16px; padding: 20px; margin-bottom: 16px; color: #ffffff;">
+        <div style="display: table; width: 100%; border-bottom: 1px dashed rgba(255, 94, 0, 0.15); padding-bottom: 10px; margin-bottom: 15px;">
+          <div style="display: table-cell; font-family: monospace; font-size: 12px; font-weight: bold; color: #ff5e00; text-transform: uppercase; letter-spacing: 1.5px; width: 50%;">
+            AKUN #${index + 1}
+          </div>
+          <div style="display: table-cell; text-align: right; width: 50%;">
+            <span style="background-color: rgba(16, 185, 129, 0.1); color: #10b981; font-size: 11px; padding: 3px 10px; border-radius: 20px; font-weight: bold; display: inline-block;">SIAP PAKAI</span>
+          </div>
+        </div>
+        
+        <div style="margin-bottom: 15px;">
+          <label style="display: block; font-size: 10px; color: #6b7280; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px; font-weight: bold;">Gmail Akun</label>
+          <div style="font-family: monospace; font-size: 14px; color: #ffffff; background-color: #050811; padding: 10px 14px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.05); word-break: break-all;">
+            ${acc.gmail}
+          </div>
+        </div>
+        
+        <div>
+          <label style="display: block; font-size: 10px; color: #6b7280; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px; font-weight: bold;">Link Akses / Aktivasi</label>
+          <a href="${acc.link_akses}" style="display: block; text-decoration: none; font-family: monospace; font-size: 13px; color: #ff5e00; background-color: rgba(255, 94, 0, 0.04); padding: 10px 14px; border-radius: 8px; border: 1px dashed rgba(255, 94, 0, 0.3); word-break: break-all;">
+            ${acc.link_akses}
+          </a>
+        </div>
       </div>
     `;
   }).join('');
@@ -148,9 +167,16 @@ async function sendEmailWithCredentials(transaction) {
   // Format login steps HTML
   const stepsHtml = loginSteps.map((step, idx) => {
     return `
-      <div style="margin-bottom: 10px;">
-        <strong style="color: #ffffff;">Langkah ${idx + 1}: ${step.title}</strong>
-        <p style="margin: 3px 0 0 0; color: #9ca3af; font-size: 13px;">${step.description}</p>
+      <div style="display: table; margin-bottom: 16px; width: 100%;">
+        <div style="display: table-cell; width: 28px; vertical-align: top;">
+          <div style="width: 22px; height: 22px; background-color: rgba(255, 94, 0, 0.08); border: 1px solid #ff5e00; border-radius: 50%; color: #ff5e00; font-size: 11px; font-weight: bold; text-align: center; line-height: 22px; font-family: monospace;">
+            ${idx + 1}
+          </div>
+        </div>
+        <div style="display: table-cell; padding-left: 10px; vertical-align: top;">
+          <strong style="color: #ffffff; font-size: 13px; display: block; margin-bottom: 3px; font-family: sans-serif;">${step.title}</strong>
+          <p style="margin: 0; color: #9ca3af; font-size: 12px; line-height: 1.4; font-family: sans-serif;">${step.description}</p>
+        </div>
       </div>
     `;
   }).join('');
@@ -160,27 +186,45 @@ async function sendEmailWithCredentials(transaction) {
     to: transaction.email,
     subject: `Ryuzo Motion — Detail Akun Alight Motion Premium (${transaction.ref_no})`,
     html: `
-      <div style="background-color: #050811; color: #f3f4f6; font-family: sans-serif; padding: 30px; border-radius: 20px; max-width: 600px; margin: 0 auto; border: 1px solid #1a2333;">
-        <h2 style="color: #ffffff; text-align: center; border-bottom: 2px solid #ff5e00; padding-bottom: 15px; margin-top: 0;">Ryuzo Motion<span style="color:#ff5e00;">.</span></h2>
-        <p>Halo,</p>
-        <p>Terima kasih telah melakukan pembelian di <strong>Ryuzo Motion</strong>. Pembayaran Anda dengan Ref ID <strong>${transaction.ref_no}</strong> telah berhasil kami terima dan verifikasi.</p>
-        <p>Berikut adalah detail akun Alight Motion Premium Anda:</p>
-        
-        ${accountsHtml}
-        
-        <div style="background-color: rgba(255, 94, 0, 0.05); border: 1px solid rgba(255, 94, 0, 0.2); border-radius: 12px; padding: 15px; margin-top: 20px;">
-          <strong style="color: #ff5e00; display: block; margin-bottom: 5px;">Catatan Khusus:</strong>
-          <p style="margin: 0; font-size: 13px; color: #f3f4f6; line-height: 1.4;">${globalNote}</p>
+      <div style="background-color: #050811; color: #f3f4f6; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; padding: 40px 20px; max-width: 600px; margin: 0 auto; border: 1px solid #141c2f; border-radius: 24px;">
+        <!-- Header -->
+        <div style="text-align: center; margin-bottom: 35px;">
+          <h1 style="color: #ffffff; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -0.5px;">
+            Ryuzo <span style="color: #ff5e00;">Motion</span>
+          </h1>
+          <p style="color: #4b5563; font-size: 10px; margin: 6px 0 0 0; text-transform: uppercase; letter-spacing: 2.5px; font-weight: bold;">Premium License Delivery</p>
         </div>
         
-        <div style="margin-top: 25px; border-top: 1px solid #1a2333; padding-top: 20px;">
-          <h3 style="color: #ffffff; margin-top: 0;">Tata Cara Login</h3>
+        <!-- Welcome text -->
+        <div style="margin-bottom: 25px;">
+          <p style="font-size: 14px; color: #9ca3af; line-height: 1.6; margin: 0;">
+            Halo,<br><br>
+            Terima kasih telah berbelanja di <strong>Ryuzo Motion</strong>. Transaksi pembayaran Anda dengan Ref ID <span style="color: #ff5e00; font-family: monospace; font-weight: bold; background-color: rgba(255, 94, 0, 0.08); padding: 3px 8px; border-radius: 6px; border: 1px solid rgba(255, 94, 0, 0.15); font-size: 12px;">${transaction.ref_no}</span> telah sukses diverifikasi secara instan.
+          </p>
+        </div>
+        
+        <!-- Accounts list -->
+        ${accountsHtml}
+        
+        <!-- Special Note -->
+        <div style="background-color: rgba(239, 68, 68, 0.03); border: 1px solid rgba(239, 68, 68, 0.2); border-radius: 14px; padding: 16px; margin: 24px 0;">
+          <strong style="color: #ef4444; display: block; font-size: 13px; margin-bottom: 6px; font-weight: bold;">⚠️ PENTING / CATATAN KHUSUS:</strong>
+          <p style="margin: 0; font-size: 12px; color: #d1d5db; line-height: 1.5; font-style: italic;">
+            ${globalNote}
+          </p>
+        </div>
+        
+        <!-- Login Steps -->
+        <div style="background-color: #080d1a; border: 1px solid rgba(255, 255, 255, 0.04); border-radius: 18px; padding: 20px; margin-top: 28px;">
+          <h3 style="color: #ffffff; margin: 0 0 16px 0; font-size: 15px; font-weight: 700; border-bottom: 1px solid rgba(255, 255, 255, 0.06); padding-bottom: 10px; letter-spacing: 0.5px;">📋 TATA CARA LOGIN AKUN</h3>
           ${stepsHtml}
         </div>
         
-        <p style="font-size: 11px; color: #9ca3af; text-align: center; margin-top: 30px; border-top: 1px solid #1a2333; padding-top: 15px;">
-          ryuzomotion.id &middot; Transaksi instan 24/7 otomatis
-        </p>
+        <!-- Footer -->
+        <div style="text-align: center; margin-top: 35px; border-top: 1px solid rgba(255, 255, 255, 0.04); padding-top: 25px; color: #4b5563; font-size: 11px;">
+          <p style="margin: 0 0 8px 0; color: #6b7280;">Layanan transaksi otomatis aktif 24 jam non-stop.</p>
+          <a href="https://ryuzomotion.id" style="color: #ff5e00; text-decoration: none; font-weight: 800; font-size: 12px; letter-spacing: 0.5px;">ryuzomotion.id</a>
+        </div>
       </div>
     `
   };
