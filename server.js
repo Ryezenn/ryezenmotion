@@ -822,16 +822,6 @@ app.post('/api/payment/create-qris', async (req, res) => {
 
     if (mustikaData && mustikaData.status === 'success') {
       const { ref_no: resRefNo, qr_url: resQrUrl, payment_link: resPaymentLink, amount: resAmount } = mustikaData;
-      let cleanQrUrl = resQrUrl;
-      try {
-        const urlObj = new URL(resQrUrl);
-        const qrisData = urlObj.searchParams.get('data');
-        if (qrisData) {
-          cleanQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrisData)}`;
-        }
-      } catch (e) {
-        console.error("Gagal mem-parse qr_url dari gateway:", e.message);
-      }
 
       // Save pending transaction in database
       const newPurchase = new Purchase({
@@ -847,7 +837,7 @@ app.post('/api/payment/create-qris', async (req, res) => {
       res.json({
         success: true,
         ref_no: resRefNo,
-        qr_url: cleanQrUrl,
+        qr_url: resQrUrl,
         payment_link: resPaymentLink,
         amount: resAmount
       });

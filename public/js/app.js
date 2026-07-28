@@ -566,19 +566,7 @@
 
         function openPaymentModal(qrUrl, refNo, amount, paymentLink) {
             const modal = document.getElementById('modal-payment');
-            
-            let cleanQrUrl = qrUrl;
-            try {
-                const urlObj = new URL(qrUrl);
-                const qrisData = urlObj.searchParams.get('data');
-                if (qrisData) {
-                    cleanQrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrisData)}`;
-                }
-            } catch (e) {
-                console.error("Gagal mem-parse qrUrl, menggunakan URL asli:", e.message);
-            }
-
-            document.getElementById('qris-image-render').src = cleanQrUrl;
+            document.getElementById('qris-image-render').src = qrUrl;
             document.getElementById('pay-ref').textContent = refNo;
             document.getElementById('pay-amount').textContent = `Rp ${Number(amount).toLocaleString('id-ID')}`;
             
